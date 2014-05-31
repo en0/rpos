@@ -3,7 +3,27 @@ rpos
 
 Research Project Operating System.
 
-Just playing around with systems programming.
+I have made many attempts and building an operating system and never achieved my goal to satisfaction. After a significant amount of leanring and continuously misplacing my code, i have decided to keep it as simple as possible.
+
+Round 1 Feature Set
+---
+
+1. Kernel will not support multi-tasking.
+2. Kernel will use an in memory ramdisk loaded as a modual.
+3. Kernel will use multiboot loader (grub or other existing solution).
+4. SYSENTER will be facilitated by NEWLIB but some functions will be stubbed.
+5. No real driver system. Keyboard and 0x000b8000 video memory are the only requirements.
+6. Kernel will EXEC from boot-time args. The intention is the in-ram-disk path to the shell.
+7. Kernel will facilitate EXECs at runtime but will always fall back to the shell specified in the boot arguments.
+8. Kernel EXEC will expect a staticly linked ELF executable.
+ 
+Example:
+
+(GRUB) kernel (hd0,0)/boot/x86-elf-kernel shell=/bin/sh
+* This will execute the shell in user mode. 
+* The shell can execute other programs but will not multi-task.
+* Shell will be re-executed when the program exits.
+    
 
 Required Tools
 ---
