@@ -34,19 +34,28 @@ CONFIG_H=$(patsubst include/%.h.in, include/%.h, $(wildcard include/*.h.in))
 
 .PHONY : all
 
-all :
-	@echo '** NOT IMPLEMENTED **'
+all : $(KERNEL)
+
+$(KERNEL) : $(OBJS)
+	@echo \ - LD $@
+	@$(K_LD) $(K_LDFLAGS) -o $@ $^
 
 # Generic Build Targets:
-%.c.o : %.c $(CONFIG_H)
-	$(CC) $(K_CFLAGS) -o $@ $<
+%.c.o : %.c
+	@echo \ - CC $@
+	@$(K_CC) $(K_CFLAGS) -o $@ -c $<
 
-%.s.o : %.s $(CONFIG_H)
-	$(AS) $(K_ASFLAGS) -o $@ $<
+%.s.o : %.s
+	@echo \ - AS $@
+	@$(K_AS) $(K_ASFLAGS) -o $@ $<
 
 %.h : %.h.in $(MAKE_CONFIG)
 	@echo \ - GENCONFIG $@
 	@$(GENCONFIG) $(MAKE_CONFIG) $< $@
+
+# Dependencies
+$(OBJS) : $(CONFIG_H)
+
 
 ## CLEAN
 
@@ -56,12 +65,9 @@ CLEAN_OBJS=$(OBJS:%=clean-%) $(KERNEL:%=clean-%) $(CONFIG_H:%=clean-%)
 
 clean : $(CLEAN_OBJS)
 
-$(CLEAN_OBJS) : clean-notice
-	@echo \ - Removing Target: $(@:clean-%=%)
+$(CLEAN_OBJS) :
+	@echo \ - RM $(@:clean-%=%)
 	@$(RM) $(@:clean-%=%)
-
-clean-notice :
-	@echo Cleaning build objects...
 
 
 ## DISK
