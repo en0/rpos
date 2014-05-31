@@ -1,19 +1,20 @@
 ## REGION: GLOBAL
 
-# Project Name
+# Project Settings
 PROJNAME = RPOS
+PROFILE = DEBUG
+ARCH=x86
+
 
 # Project root path
 TOP := $(dir $(CURDIR)/$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST)))
-
-# Identify the build targets
-OUT=$(TOP)build/
 
 # Top Level Build targets
 SUBDIRS = src/kernel
 
 # Some Utilities
 GENCONFIG=$(TOP)/scripts/genconfig.py
+QEMU=qemu-system-x86_64
 
 ## END REGION: GLOBAL
 
@@ -25,9 +26,6 @@ K_CC=i686-elf-gcc
 K_LD=i686-elf-ld
 K_AS=i686-elf-as
 K_AR=i686-elf-ar
-
-# Targets
-K_TARGET=x86
 
 # FLAGS
 K_CFLAGS=

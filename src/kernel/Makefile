@@ -20,8 +20,8 @@ MAKE_CONFIG=../../config.mk
 
 include $(MAKE_CONFIG)
 
-ARCH_PATH := arch/$(K_TARGET)
-KERNEL=$(K_TARGET)-elf-kernel
+ARCH_PATH := arch/$(ARCH)
+KERNEL=$(ARCH)-elf-kernel
 
 OBJS=$(patsubst %.c, %.c.o, $(wildcard *.c)) \
      $(patsubst %.s, %.s.o, $(wildcard *.s)) \
@@ -29,6 +29,12 @@ OBJS=$(patsubst %.c, %.c.o, $(wildcard *.c)) \
      $(patsubst $(ARCH_PATH)/%.s, $(ARCH_PATH)/%.s.o, $(wildcard $(ARCH_PATH)/*.s)) \
 
 CONFIG_H=$(patsubst include/%.h.in, include/%.h, $(wildcard include/*.h.in))
+
+## Determin Profile
+ifeq ($(PROFILE), DEBUG)
+K_CFLAGS := $(K_CFLAGS) -ggdb
+K_ASFLAGS := $(K_ASFLAGS) -ggdb
+endif
 
 ## BUILD
 
@@ -38,7 +44,7 @@ all : $(KERNEL)
 
 $(KERNEL) : $(OBJS)
 	@echo \ - LD $@
-	@$(K_LD) $(K_LDFLAGS) -o $@ $^
+	@$(K_LD) $(K_LDFLAGS) -T linker.ld -o $@ $^
 
 # Generic Build Targets:
 %.c.o : %.c
@@ -82,14 +88,20 @@ disk :
 
 .PHONY : run
 
-run :
-	@echo '** NOT IMPLEMENTED **'
+run : $(KERNEL)
+	@echo NOTICE: Profile is $(PROFILE)
+	@$(QEMU) -kernel $<
 
 
 .PHONY : debug
 
-debug :
-	@echo '** NOT IMPLEMENTED **'
+debug : $(KERNEL)
+	@echo NOTICE: Profile is $(PROFILE)
+	@echo Start debugger and attache to host on port 1234
+	@echo Example with GDB:
+	@echo \ target remote localhost:1234
+	@echo \ symbol-file $<
+	@$(QEMU) -s -S -kernel $<
 
 
 ## INFO
@@ -100,7 +112,7 @@ info :
 	@echo ""
 	@echo Build configuration information.
 	@echo ""
-	@echo Objects for target \"$(K_TARGET)\":
+	@echo Objects for arch \"$(ARCH) \($(PROFILE)\)\":
 	@echo $(OBJS) | xargs -n1 | sed s/^/\ -\ /
 	@echo ""
 	@echo Configuration Headers.
