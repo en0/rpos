@@ -33,6 +33,10 @@ To build the system you must first install or build the required tools and confi
 
     Open configure.mk. Verify the compiler names match the ones you just created. Also, feel free to tweek any other settings.
     
+    Also, verify that your compiler is in your path. There is a bash script in the scripts directory to add it for you assuming the compiler name is the default.
+    
+    _$ . scripts/env.sh_
+    
 3. Review Options.
 
     You can look at the current env by running _make info_. 
