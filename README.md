@@ -45,10 +45,10 @@ To build the system you must first install or build the required tools and confi
     
 4. Build the project.
 
-    _make_
+    _$ make_
     
 5. Run the project.
 
-    _make run-src/kernel_.
+    _$ make run-src/kernel_.
     
     You can run other targets the same way. run _make options_ for more details.
