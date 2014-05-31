@@ -1,0 +1,7 @@
+#ifndef __CONFIG_H
+#define __CONFIG_H 1
+
+#define ARCH_TARGET "@K_TARGET"
+#define PROJNAME "@PROJNAME"
+
+#endif /** __CONFIG_H **/
