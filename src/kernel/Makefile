@@ -16,8 +16,9 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+MAKE_CONFIG=../../config.mk
 
-include ../../config.mk
+include $(MAKE_CONFIG)
 
 ARCH_PATH := arch/$(K_TARGET)
 KERNEL=$(K_TARGET)-elf-kernel
@@ -25,27 +26,31 @@ KERNEL=$(K_TARGET)-elf-kernel
 OBJS=$(patsubst %.c, %.c.o, $(wildcard *.c)) \
      $(patsubst %.s, %.s.o, $(wildcard *.s)) \
      $(patsubst $(ARCH_PATH)/%.c, $(ARCH_PATH)/%.c.o, $(wildcard $(ARCH_PATH)/*.c)) \
-     $(patsubst $(ARCH_PATH)/%.s, $(ARCH_PATH)/%.s.o, $(wildcard $(ARCH_PATH)/*.s))
+     $(patsubst $(ARCH_PATH)/%.s, $(ARCH_PATH)/%.s.o, $(wildcard $(ARCH_PATH)/*.s)) \
 
+CONFIG_H=$(patsubst include/%.h.in, include/%.h, $(wildcard include/*.h.in))
 
 ## BUILD
 
 .PHONY : all
 
-all : 
+all :
 	@echo '** NOT IMPLEMENTED **'
 
 # Generic Build Targets:
-%.c.o : %.c
+%.c.o : %.c $(CONFIG_H)
 	$(CC) $(K_CFLAGS) -o $@ $<
 
-%.s.o : %.s
+%.s.o : %.s $(CONFIG_H)
 	$(AS) $(K_ASFLAGS) -o $@ $<
 
+%.h : %.h.in $(MAKE_CONFIG)
+	@echo \ - GENCONFIG $@
+	@$(GENCONFIG) $(MAKE_CONFIG) $< $@
 
 ## CLEAN
 
-CLEAN_OBJS=$(OBJS:%=clean-%) $(KERNEL:%=clean-%)
+CLEAN_OBJS=$(OBJS:%=clean-%) $(KERNEL:%=clean-%) $(CONFIG_H:%=clean-%)
 
 .PHONY : clean clean-notice $(CLEAN_OBJS)
 
@@ -87,10 +92,13 @@ debug :
 
 info :
 	@echo ""
-	@echo Build configuration information for all targets.
+	@echo Build configuration information.
 	@echo ""
 	@echo Objects for target \"$(K_TARGET)\":
 	@echo $(OBJS) | xargs -n1 | sed s/^/\ -\ /
+	@echo ""
+	@echo Configuration Headers.
+	@echo $(CONFIG_H) | xargs -n1 | sed s/^/\ -\ /
 	@echo ""
 	@echo Using cross compiler utilities with the respective flags:
 	@echo \ - CC : $(K_CC)

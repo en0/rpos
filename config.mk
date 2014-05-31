@@ -12,6 +12,9 @@ OUT=$(TOP)build/
 # Top Level Build targets
 SUBDIRS = src/kernel
 
+# Some Utilities
+GENCONFIG=$(TOP)/scripts/genconfig.py
+
 ## END REGION: GLOBAL
 
 
