@@ -1,15 +1,16 @@
 ## REGION: GLOBAL
 
+# Project Name
+PROJNAME = RPOS
+
+# Project root path
 TOP := $(dir $(CURDIR)/$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST)))
 
 # Identify the build targets
 OUT=$(TOP)build/
 
-# Includes
-INCLUDE=$(TOP)include
-
-# Libs
-LIBS=$(TOP)libs
+# Top Level Build targets
+SUBDIRS = src/kernel
 
 ## END REGION: GLOBAL
 
@@ -24,6 +25,11 @@ K_AR=i686-elf-ar
 
 # Targets
 K_TARGET=x86
+
+# FLAGS
+K_CFLAGS=
+K_ASFLAGS=
+K_LDFLAGS=
 
 ## END REGION: KERNEL
 
