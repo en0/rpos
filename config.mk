@@ -46,7 +46,7 @@ K_AS=i686-elf-as
 K_AR=i686-elf-ar
 
 # FLAGS
-K_CFLAGS=
+K_CFLAGS = -ffreestanding -O2 -Wall -nostdlib
 K_ASFLAGS=
 K_LDFLAGS=
 
