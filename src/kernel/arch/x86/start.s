@@ -17,6 +17,7 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
         .global _start
+
         .extern main
         .extern _KERNEL_END_
 
@@ -28,13 +29,16 @@
         ## Kernel Entry 
 
 _start: ## Validate boot loader is multiboot complient
-        cmp VALID_MAGIC, %eax
-        je _hlt
+        cmp $VALID_MAGIC, %eax
+        jne _hlt
 
         ## Setup The temp stack
         movl $stack, %esp
 
-        ## Call kmain(mboot*)
+        ## Install flat GDT
+        nop
+
+        ## Call kmain(mboot*, kernel_end*)
         push _KERNEL_END_
         push %ebx
         call main
@@ -42,7 +46,7 @@ _start: ## Validate boot loader is multiboot complient
         ## Safty loop
 _hlt:   cli
         hlt
-        jmp _start
+_hang:  jmp _hang
 
         ## Allocate a 16K temporary stack that will get the job done
         ## untill we can get memory management setup.
