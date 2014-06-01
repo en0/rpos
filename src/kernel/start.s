@@ -16,23 +16,36 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    ## Multiboot Flags
+        .global _start
+        .extern main
+        .extern _KERNEL_END_
 
-    .set ALIGN, 1<<0
-    .set MEMINFO, 1<<1
+        ## Multiboot Validation
+        .set VALID_MAGIC, 0x2BADB002
 
-    ## Compute Multiboot header values
+        .section .text
 
-    .set FLAGS, ALIGN | MEMINFO
-    .set MAGIC, 0x1BADB002
-    .set CHECKSUM, -(MAGIC + FLAGS)
+        ## Kernel Entry 
 
-    .section .multiboot
+_start: ## Validate boot loader is multiboot complient
+        cmp VALID_MAGIC, %eax
+        je _hlt
 
-    ## Multiboot Header
+        ## Setup The temp stack
+        movl $stack, %esp
 
-    .align 4
-    .long MAGIC
-    .long FLAGS
-    .long CHECKSUM
+        ## Call kmain(mboot*)
+        push _KERNEL_END_
+        push %ebx
+        call main
 
+        ## Safty loop
+_hlt:   cli
+        hlt
+        jmp _start
+
+        ## Allocate a 16K temporary stack that will get the job done
+        ## untill we can get memory management setup.
+        .section .tstack, "aw", @nobits
+        .skip 16384
+stack:  nop
