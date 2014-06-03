@@ -18,13 +18,23 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#ifndef __CONFIG_H
-#define __CONFIG_H 1
+#include <config.h>
+#include <stdint.h>
 
-#define ARCH "@ARCH"
-#define ARCH_@ARCH 1
+#ifndef __X86_KPRINT_H
+#define __X86_KPRINT_H 1
 
-#define PROJNAME "@PROJNAME"
-#define PROFILE_@PROFILE 1
+typedef uint32_t x86_kfpos_t;
 
-#endif /** __CONFIG_H **/
+int x86_kprintf(const char *format, ...);
+int x86_kputchar(int character);
+int x86_kputs(const char* str);
+int x86_kgetpos(x86_kfpos_t* pos);
+int x86_ksetpos(x86_kfpos_t* pos);
+int x86_ktell();
+int x86_kseek(long offset, int whence);
+void x86_krewind();
+
+
+#endif /* __X86_KPRINTF */
+

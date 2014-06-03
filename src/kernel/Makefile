@@ -49,7 +49,7 @@ $(KERNEL) : $(OBJS)
 # Generic Build Targets:
 %.c.o : %.c
 	@echo \ - CC $@
-	@$(K_CC) $(K_CFLAGS) -Iinclude -o $@ -c $<
+	@$(K_CC) $(K_CFLAGS) -Iinclude -I$(ARCH_PATH)/include -o $@ -c $<
 
 %.s.o : %.s
 	@echo \ - AS $@
