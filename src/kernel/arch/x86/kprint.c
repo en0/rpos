@@ -22,9 +22,18 @@
 
 #ifdef PROFILE_DEBUG
 
-#include <x86_kprintf.h>
+#include <x86_kprint.h>
 #include <stdarg.h>
 
+#define VIDEO_MEMORY 0xB8000
+#define VIDEO_COLOR 0x04 // Red on black
+#define SCREEN_WIDTH 80
+#define SCREEN_HEIGHT 25
+
+typedef volatile uint16_t vidtext_t;
+
+x86_kfpos_t _cursor = 0;
+vidtext_t* _video_memory = (vidtext_t*)VIDEO_MEMORY;
 
 int x86_kprintf(const char *format, ...) {
     const char *p;
@@ -82,11 +91,14 @@ int x86_kprintf(const char *format, ...) {
 
 
 int x86_kputchar(int character) {
+    _video_memory[_cursor++] = (character & 0xFF) | (VIDEO_COLOR << 8);
     return 0;
 }
 
 
 int x86_kputs(const char* str) {
+    for(; *str != '\0'; str++)
+        x86_kputchar((int)*str);
     return 0;
 }
 
