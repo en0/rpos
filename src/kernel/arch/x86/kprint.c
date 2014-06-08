@@ -91,7 +91,22 @@ int x86_kprintf(const char *format, ...) {
 
 
 int x86_kputchar(int character) {
-    _video_memory[_cursor++] = (character & 0xFF) | (VIDEO_COLOR << 8);
+
+    switch((char)(character & 0xFF)) {
+
+        case '\n':
+            _cursor += SCREEN_WIDTH;
+        case '\r':
+            _cursor -= (_cursor % SCREEN_WIDTH);
+            break;
+        case '\b':
+            // Issue here
+            //_video_memory[_cursor--] = ' ' | (VIDEO_COLOR << 8);
+        default:
+            _video_memory[_cursor++] = (character & 0xFF) | (VIDEO_COLOR << 8);
+            break;
+    }
+    // Scroll
     return 0;
 }
 

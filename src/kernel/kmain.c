@@ -26,7 +26,7 @@ void main(int bootinfo, void * end_of_kernel) {
      * end_of_kernel points to the bottom of the stack
      * We need to lock memory to end_of_kernel and set up a new stack */
      
-     kputs("Hello, World");
+     kputs("Hello, World\nHello, Again!\b");
 
      for(;;);
 
