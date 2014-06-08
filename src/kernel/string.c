@@ -18,31 +18,25 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <config.h>
-#include <kprint.h>
-#include "string.h"
+#include <string.h>
 
+void *memcpy(void *destination, const void *source, size_t num) {
+    char* d = (char*)destination;
+    char* s = (char*)source;
+    for(;num > 0; *d++ = *s++, num--);
+    return destination;
+}
 
-void main(int bootinfo, void * end_of_kernel) {
-    /* bootinfo points to the multiboot header
-     * end_of_kernel points to the bottom of the stack
-     * We need to lock memory to end_of_kernel and set up a new stack */
+void *memset(void* ptr, int value, size_t num) {
+    char* d = (char*)ptr;
+    char v = (char)(value & 0xFF);
+    for(;num > 0; *d++ = v, num--);
+    return ptr;
+}
 
-    kclear();
-
-    kprintf("\n\nkprintf now supports: %s, %s, %s\n\n", "Strings (%s)", "Characters (%c)", "Literals (%%)");
-
-    kputs("Tabs:\tAre now supported");
-    kputs("\t\tSee it?");
-
-    kseek(95, KSEEK_CUR);
-    kputs("Seeking is now supported");
-
-    krewind();
-    kputs("And last, Rewinding is now supported");
-
-
-    for(;;);
-
+size_t strlen(const char* str) {
+    size_t i;
+    for(i = 0; *str != '\0'; str++, i++);
+    return i;
 }
 
