@@ -159,7 +159,7 @@ int x86_kputchar(int character) {
 
         case '\t':
             x86_kputchar(0x20);
-            for(i = 0; i < (_cursor+1) % TAB_WIDTH; i++)
+            for(i = 0; i < (_cursor) % TAB_WIDTH; i++)
                 x86_kputchar(0x20);
             break;
 
@@ -205,7 +205,7 @@ int x86_kseek(long offset, int whence) {
             return 1;
     }
 
-    if(nc > 0 && nc < SCREEN_MAX_CURSOR)
+    if(nc >= 0 && nc < SCREEN_MAX_CURSOR)
         _cursor = nc;
         return 0;
 
