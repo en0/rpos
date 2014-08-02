@@ -22,7 +22,7 @@
 #include <kprint.h>
 #include "string.h"
 
-void main(int bootinfo, void * end_of_kernel) {
+void main(int bootinfo, int end_of_kernel) {
     /* bootinfo points to the multiboot header
      * end_of_kernel points to the bottom of the stack
      * We need to lock memory to end_of_kernel and set up a new stack */

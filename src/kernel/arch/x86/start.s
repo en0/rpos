@@ -19,7 +19,7 @@
         .global _start
 
         .extern main
-        .extern _KERNEL_END_
+        .extern _end
 
         ## Multiboot Validation
         .set VALID_MAGIC, 0x2BADB002
@@ -39,7 +39,8 @@ _start: ## Validate boot loader is multiboot complient
         nop
 
         ## Call kmain(mboot*, kernel_end*)
-        push _KERNEL_END_
+        lea _end, %ecx
+        push %ecx
         push %ebx
         call main
 
