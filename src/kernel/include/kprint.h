@@ -25,10 +25,6 @@
 #ifndef __KPRINT_H
 #define __KPRINT_H 1
 
-#define KSEEK_SET X86_KSEEK_SET
-#define KSEEK_CUR X86_KSEEK_CUR
-#define KSEEK_END X86_KSEEK_END
-
 /** Platform independent function Information **/
 
 
@@ -76,36 +72,6 @@
  **   On success, the total number of characters written is returned.
  **   On error, -1 is returned. */
 
-
-/** Function: int kseek (long int offset, int origin )
- ** Sets the position indicator associated with the stream to a new position.
- ** 
- ** Arguments:
- **   offset - Number of characters to offset from origin.
- **   origin - Position used as reference for the offset. It is specified by 
- **            one of the following constants
- **            KSEEK_SET Beginning of screen
- **            KSEEK_CUR Current cursor location
- **            KSEEK_END End of screen
- **
- ** Returns:
- **   If successful, the function returns zero.
- **   Otherwise, it returns non-zero value. */
-
-
-/** Function: int ktell()
- ** Returns the current value of the position indicator of the stream.
- **
- ** Returns:
- **   On success, the current value of the position indicator is returned.
- **   On failure, -1 is returned */
-
-
-/** Function: void krewind()
- ** Sets the position indicator associated with stream to the beginning of 
- ** the file. */
-
-
 /** 
  ** Setup macros to the real functions from the arch specific implementation 
  **/
@@ -113,13 +79,9 @@
 #ifdef ARCH_x86
 #include <x86_kprint.h>
 #define kclear x86_kclear
-#define kfpos x86_kfpos
 #define kprintf x86_kprintf
 #define kputchar x86_kputchar
 #define kputs x86_kputs
-#define ktell x86_ktell
-#define kseek x86_kseek
-#define krewind x86_krewind
 #endif /** ARCH_x86 **/
 
 

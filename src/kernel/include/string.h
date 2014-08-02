@@ -71,5 +71,17 @@ void *memset(void* ptr, int value, size_t num);
 size_t strlen(const char* str);
 
 
+/** Reverse a C string
+ ** Reverse the order of a C string in place                        **
+ **                                                                 **
+ ** Arguments:                                                      **
+ **   str - The C String to reverse.                                **
+ **                                                                 **
+ ** Returns:                                                        **
+ **   pointer to str                                                **/
+
+char* strrev(const char* str);
+
+
 #endif /** __STRING_H **/
 

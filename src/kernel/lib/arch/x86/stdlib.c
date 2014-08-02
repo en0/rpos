@@ -20,23 +20,46 @@
 
 #include <string.h>
 
-void *memcpy(void *destination, const void *source, size_t num) {
-    char* d = (char*)destination;
-    char* s = (char*)source;
-    for(;num > 0; *d++ = *s++, num--);
-    return destination;
+char* itoa(int value, char* str, int base) {
+    static char* num = "0123456789abcdef";
+    char* ret = str;
+    int sign = value;
+
+    if (base<2 || base>16) {
+        *ret='\0';
+        return NULL;
+    }
+
+    if(value < 0)
+        value = -value;
+
+    do {
+        *ret++ = num[value % base]; 
+    } while(value/=base);
+
+    if(sign < 0)
+        *ret++ = '-';
+
+    *ret++ = '\0';
+
+    return strrev(str);
 }
 
-void *memset(void* ptr, int value, size_t num) {
-    char* d = (char*)ptr;
-    char v = (char)(value & 0xFF);
-    for(;num > 0; *d++ = v, num--);
-    return ptr;
-}
+char* uitoa(unsigned value, char* str, int base) {
+    static char* num = "0123456789abcdef";
+    char* ret = str;
 
-size_t strlen(const char* str) {
-    size_t i;
-    for(i = 0; *str != '\0'; str++, i++);
-    return i;
+    if (base<2 || base>16) {
+        *ret='\0';
+        return NULL;
+    }
+
+    do {
+        *ret++ = num[value % base]; 
+    } while(value/=base);
+
+    *ret++ = '\0';
+
+    return strrev(str);
 }
 

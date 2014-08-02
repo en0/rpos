@@ -31,11 +31,13 @@ SECTIONS
         *(COMMON)
         *(.bss)
 
-        _KERNEL_END_ = .;
+        .end = .;
 
         /* This stack refrence is temporary. We will exclude it from the locked memory because
          * we will be setting up a new stack in the pmemory manager and we want to reclaime ths
          * space. That is why kernel end does not take the tstack region into account. */
         *(.tstack)
     }
+
+    _KERNEL_END_ = .end;
 }

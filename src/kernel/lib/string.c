@@ -18,21 +18,37 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <config.h>
-#include <kprint.h>
-#include "string.h"
+#include <string.h>
 
-void main(int bootinfo, void * end_of_kernel) {
-    /* bootinfo points to the multiboot header
-     * end_of_kernel points to the bottom of the stack
-     * We need to lock memory to end_of_kernel and set up a new stack */
+void *memcpy(void *destination, const void *source, size_t num) {
+    char* d = (char*)destination;
+    char* s = (char*)source;
+    for(;num > 0; *d++ = *s++, num--);
+    return destination;
+}
 
-    kclear();
+void *memset(void* ptr, int value, size_t num) {
+    char* d = (char*)ptr;
+    char v = (char)(value & 0xFF);
+    for(;num > 0; *d++ = v, num--);
+    return ptr;
+}
 
-    kprintf("Research Porject Kernel\n"
-            "Unable to parse boot info as of yet.\n"
-            "Kernel ends at %p\n", end_of_kernel);
+size_t strlen(const char* str) {
+    size_t i;
+    for(i = 0; *str != '\0'; str++, i++);
+    return i;
+}
 
-    for(;;);
+char* strrev(const char *str) {
+    int i, j;
+    char c;
+    char *s = str;
+    for(i = 0, j = strlen(s)-1; i<j; i++, j--) {
+        c = s[i];
+        s[i] = s[j];
+        s[j] = c;
+    }
+    return str;
 }
 

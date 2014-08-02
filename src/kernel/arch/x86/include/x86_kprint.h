@@ -24,20 +24,10 @@
 #ifndef __X86_KPRINT_H
 #define __X86_KPRINT_H 1
 
-#define X86_KSEEK_SET 1
-#define X86_KSEEK_CUR 2
-#define X86_KSEEK_END 3
-
-typedef uint32_t x86_kfpos_t;
-
 int x86_kprintf(const char *format, ...);
 int x86_kputchar(int character);
 int x86_kputs(const char* str);
-int x86_ktell();
-int x86_kseek(long offset, int whence);
-void x86_krewind();
 void x86_kclear();
-
 
 #endif /* __X86_KPRINTF */
 

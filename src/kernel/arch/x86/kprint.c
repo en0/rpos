@@ -37,9 +37,13 @@
 #define SCREEN_REAL_WIDTH (SCREEN_WIDTH * SCREEN_CHAR_WIDTH)
 
 typedef volatile uint16_t vidtext_t;
+typedef uint32_t x86_kfpos_t;
 
 x86_kfpos_t _cursor = 0;
 vidtext_t* _video_memory = (vidtext_t*)VIDEO_MEMORY;
+
+extern char* itoa(int value, char* str, int base);
+extern char* uitoa(int value, char* str, int base);
 
 int _set_color(char character, int color) {
     return (((int)character) & 0xFF) | (color << 8);
@@ -71,7 +75,7 @@ void x86_kclear() {
 
     for(i = 0; i < SCREEN_HEIGHT*2; i++)
         x86_kputchar('\n');
-    x86_krewind();
+    _cursor = 0;
 }
 
 int x86_kprintf(const char *format, ...) {
@@ -80,6 +84,7 @@ int x86_kprintf(const char *format, ...) {
 
     int va_char;
     char *va_str;
+    char buffer[32];
 
     va_list params;
     va_start(params, format);
@@ -114,24 +119,38 @@ int x86_kprintf(const char *format, ...) {
 
             case 'd' : /* Signed Integer */
             case 'i' :
+                va_char = (int)va_arg(params, int);
+                itoa(va_char, buffer, 10);
+                x86_kprintf(buffer);
                 break;
 
             case 'u' : /* Unsigned Integer */
+                va_char = (int)va_arg(params, int);
+                uitoa(va_char, buffer, 10);
+                x86_kprintf(buffer);
                 break;
 
-            case 'x' : /* Unsigned Hex (lower case) */
-                break;
-
-            case 'X' : /* Unsigned Hex (lower case) */
+            case 'x' : /* Unsigned Hex (lower case only) */
+            case 'X' : 
+                va_char = (int)va_arg(params, int);
+                uitoa(va_char, buffer, 16);
+                x86_kprintf(buffer);
                 break;
                 
             case 'o' : /* Unsigned Octal */
+                va_char = (int)va_arg(params, int);
+                uitoa(va_char, buffer, 8);
+                x86_kprintf(buffer);
                 break;
 
             case 'p' : /* Pointer */
+                va_char = (int)va_arg(params, int);
+                uitoa(va_char, buffer, 16);
+                x86_kprintf("0x%s", buffer);
                 break;
 
             case 'n' : /* nothing (Param must be an int) */
+                va_char = (int)va_arg(params, int);
                 break;
         }
     }
@@ -178,44 +197,6 @@ int x86_kputs(const char* str) {
         x86_kputchar((int)*str);
     x86_kputchar('\n');
     return i;
-}
-
-
-int x86_ktell() {
-    return _cursor;
-}
-
-
-int x86_kseek(long offset, int whence) {
-
-    x86_kfpos_t nc = _cursor;
-
-    switch(whence) {
-        case X86_KSEEK_SET:
-            nc = offset;
-            break;
-        case X86_KSEEK_CUR:
-            nc += offset;
-            break;
-        case X86_KSEEK_END:
-            nc = SCREEN_MAX_CURSOR + offset;
-            break;
-        default:
-            // Invalid origin.
-            return 1;
-    }
-
-    if(nc >= 0 && nc < SCREEN_MAX_CURSOR)
-        _cursor = nc;
-        return 0;
-
-    // cursor not in range
-    return -1;
-}
-
-
-void x86_krewind() {
-    _cursor = 0;
 }
 
 
