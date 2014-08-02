@@ -18,21 +18,48 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <config.h>
-#include <kprint.h>
-#include "string.h"
+#include <string.h>
 
-void main(int bootinfo, void * end_of_kernel) {
-    /* bootinfo points to the multiboot header
-     * end_of_kernel points to the bottom of the stack
-     * We need to lock memory to end_of_kernel and set up a new stack */
+char* itoa(int value, char* str, int base) {
+    static char* num = "0123456789abcdef";
+    char* ret = str;
+    int sign = value;
 
-    kclear();
+    if (base<2 || base>16) {
+        *ret='\0';
+        return NULL;
+    }
 
-    kprintf("Research Porject Kernel\n"
-            "Unable to parse boot info as of yet.\n"
-            "Kernel ends at %p\n", end_of_kernel);
+    if(value < 0)
+        value = -value;
 
-    for(;;);
+    do {
+        *ret++ = num[value % base]; 
+    } while(value/=base);
+
+    if(sign < 0)
+        *ret++ = '-';
+
+    *ret++ = '\0';
+
+    return strrev(str);
+}
+
+char* uitoa(unsigned value, char* str, int base) {
+    static char* num = "0123456789abcdef";
+    char* ret = str;
+
+    if (base<2 || base>16) {
+        *ret='\0';
+        return NULL;
+    }
+
+    do {
+        *ret++ = num[value % base]; 
+    } while(value/=base);
+
+    *ret++ = '\0';
+
+    return strrev(str);
 }
 

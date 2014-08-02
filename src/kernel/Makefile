@@ -21,12 +21,12 @@ MAKE_CONFIG=../../config.mk
 include $(MAKE_CONFIG)
 
 ARCH_PATH := arch/$(ARCH)
+LIB_PATH := lib
+LIB_PATH_ARCH := $(LIB_PATH)/arch/$(ARCH)
 KERNEL=$(ARCH)-elf-kernel
 
-OBJS=$(patsubst %.c, %.c.o, $(wildcard *.c)) \
-     $(patsubst %.s, %.s.o, $(wildcard *.s)) \
-     $(patsubst $(ARCH_PATH)/%.c, $(ARCH_PATH)/%.c.o, $(wildcard $(ARCH_PATH)/*.c)) \
-     $(patsubst $(ARCH_PATH)/%.s, $(ARCH_PATH)/%.s.o, $(wildcard $(ARCH_PATH)/*.s)) \
+OBJS=$(patsubst %.c, %.c.o, $(wildcard *.c) $(wildcard $(ARCH_PATH)/*.c) $(wildcard $(LIB_PATH)/*.c) $(wildcard $(LIB_PATH_ARCH)/*.c)) \
+     $(patsubst %.s, %.s.o, $(wildcard *.s) $(wildcard $(ARCH_PATH)/*.s) $(wildcard $(LIB_PATH)/*.s) $(wildcard $(LIB_PATH_ARCH)/*.s))
 
 CONFIG_H=$(patsubst include/%.h.in, include/%.h, $(wildcard include/*.h.in))
 
@@ -49,7 +49,7 @@ $(KERNEL) : $(OBJS)
 # Generic Build Targets:
 %.c.o : %.c
 	@echo \ - CC $@
-	@$(K_CC) $(K_CFLAGS) -Iinclude -o $@ -c $<
+	@$(K_CC) $(K_CFLAGS) -Iinclude -I$(ARCH_PATH)/include -o $@ -c $<
 
 %.s.o : %.s
 	@echo \ - AS $@

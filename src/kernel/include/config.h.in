@@ -22,6 +22,9 @@
 #define __CONFIG_H 1
 
 #define ARCH "@ARCH"
+#define ARCH_@ARCH 1
+
 #define PROJNAME "@PROJNAME"
+#define PROFILE_@PROFILE 1
 
 #endif /** __CONFIG_H **/

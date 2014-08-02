@@ -19,20 +19,15 @@
  **/
 
 #include <config.h>
-#include <kprint.h>
-#include "string.h"
+#include <stdint.h>
 
-void main(int bootinfo, void * end_of_kernel) {
-    /* bootinfo points to the multiboot header
-     * end_of_kernel points to the bottom of the stack
-     * We need to lock memory to end_of_kernel and set up a new stack */
+#ifndef __X86_KPRINT_H
+#define __X86_KPRINT_H 1
 
-    kclear();
+int x86_kprintf(const char *format, ...);
+int x86_kputchar(int character);
+int x86_kputs(const char* str);
+void x86_kclear();
 
-    kprintf("Research Porject Kernel\n"
-            "Unable to parse boot info as of yet.\n"
-            "Kernel ends at %p\n", end_of_kernel);
-
-    for(;;);
-}
+#endif /* __X86_KPRINTF */
 
