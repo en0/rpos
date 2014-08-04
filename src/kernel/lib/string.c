@@ -43,12 +43,12 @@ size_t strlen(const char* str) {
 char* strrev(const char *str) {
     int i, j;
     char c;
-    char *s = str;
+    char *s = (char*)str;
     for(i = 0, j = strlen(s)-1; i<j; i++, j--) {
         c = s[i];
         s[i] = s[j];
         s[j] = c;
     }
-    return str;
+    return (char*)str;
 }
 
