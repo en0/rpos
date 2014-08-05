@@ -18,37 +18,18 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <string.h>
+#ifndef __KERNEL_H
+#define __KERNEL_H 1
 
-void *memcpy(void *destination, const void *source, size_t num) {
-    char* d = (char*)destination;
-    char* s = (char*)source;
-    for(;num > 0; *d++ = *s++, num--);
-    return destination;
-}
+#include <stdint.h>
+#include <stdbool.h>
+#include <pmem.h>
 
-void *memset(void* ptr, int value, size_t num) {
-    char* d = (char*)ptr;
-    char v = (char)(value & 0xFF);
-    for(;num > 0; *d++ = v, num--);
-    return ptr;
-}
+extern void* _start;
+extern void* _end;
 
-size_t strlen(const char* str) {
-    size_t i;
-    for(i = 0; *str != '\0'; str++, i++);
-    return i;
-}
+#define _START ((void*)&_start)
+#define _END ((void*)&_end)
 
-char* strrev(const char *str) {
-    int i, j;
-    char c;
-    char *s = (char*)str;
-    for(i = 0, j = strlen(s)-1; i<j; i++, j--) {
-        c = s[i];
-        s[i] = s[j];
-        s[j] = c;
-    }
-    return (char*)str;
-}
+#endif /* __KERNEL_H */
 

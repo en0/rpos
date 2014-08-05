@@ -19,10 +19,18 @@
         .global _start
 
         .extern main
-        .extern _end
+        .extern x86_kprintf
+        .extern x86_kclear
 
         ## Multiboot Validation
         .set VALID_MAGIC, 0x2BADB002
+
+        .section .rodata
+
+halt_message:
+        .asciz "System Halted.\n"
+mboot_fail:
+        .asciz "Ooh Snap!\n\nYour bootloader does not appear to be multiboot complient.\n"
 
         .section .text
 
@@ -30,24 +38,37 @@
 
 _start: ## Validate boot loader is multiboot complient
         cmp $VALID_MAGIC, %eax
-        jne _hlt
+        jne _fail_mb
 
         ## Setup The temp stack
         movl $stack, %esp
 
+        ## Reset EFLAGS
+        pushl $0
+        popf
+
         ## Install flat GDT
         nop
 
-        ## Call kmain(mboot*, kernel_end*)
-        lea _end, %ecx
-        push %ecx
+        ## Call kmain(mboot*)
         push %ebx
+        call x86_kclear
         call main
 
-        ## Safty loop
-_hlt:   cli
+        ## System Halt Message
+_hlt:   push $halt_message
+        call x86_kprintf
+        cli
         hlt
+
+        ## Safty loop
 _hang:  jmp _hang
+
+_fail_mb:
+        call x86_kclear
+        push $mboot_fail
+        call x86_kprintf
+        jmp _hlt
 
         ## Allocate a 16K temporary stack that will get the job done
         ## untill we can get memory management setup.

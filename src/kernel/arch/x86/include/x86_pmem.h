@@ -18,37 +18,18 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <string.h>
+#ifndef __X86_PMEM_H
+#define __X86_PMEM_H 1
 
-void *memcpy(void *destination, const void *source, size_t num) {
-    char* d = (char*)destination;
-    char* s = (char*)source;
-    for(;num > 0; *d++ = *s++, num--);
-    return destination;
-}
+#include <stdint.h>
+#include <stdbool.h>
 
-void *memset(void* ptr, int value, size_t num) {
-    char* d = (char*)ptr;
-    char v = (char)(value & 0xFF);
-    for(;num > 0; *d++ = v, num--);
-    return ptr;
-}
+void* x86_pmem_alloc();
+void* x86_pmem_alloc_low();
+void x86_pmem_free(void* addr);
+void x86_pmem_lock_region(void* addr, uint32_t size);
+void x86_pmem_free_region(void* addr, uint32_t size);
+void x86_pmem_init(void* map_start, uint32_t size);
 
-size_t strlen(const char* str) {
-    size_t i;
-    for(i = 0; *str != '\0'; str++, i++);
-    return i;
-}
-
-char* strrev(const char *str) {
-    int i, j;
-    char c;
-    char *s = (char*)str;
-    for(i = 0, j = strlen(s)-1; i<j; i++, j--) {
-        c = s[i];
-        s[i] = s[j];
-        s[j] = c;
-    }
-    return (char*)str;
-}
+#endif /* __X86_PMEM_H */
 

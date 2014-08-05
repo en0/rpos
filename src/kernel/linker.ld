@@ -3,6 +3,7 @@ SECTIONS
 {
     /* Begin putting sections at 1 MiB, a conventional place for kernels to be loaded at by the bootloader. */
     . = 1M;
+    PROVIDE(_start = .);
 
     /* First put the multiboot header, as it is required to be put very early
      * early in the image or the bootloader won't recognize the file format.
@@ -31,7 +32,6 @@ SECTIONS
         *(COMMON)
         *(.bss)
 
-        .end = .;
 
         /* This stack refrence is temporary. We will exclude it from the locked memory because
          * we will be setting up a new stack in the pmemory manager and we want to reclaime ths
@@ -39,6 +39,7 @@ SECTIONS
         *(.tstack)
     }
 
+    .end = .;
     PROVIDE(_end = .end);
 
 }

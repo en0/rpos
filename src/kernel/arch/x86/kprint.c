@@ -148,6 +148,11 @@ int x86_kprintf(const char *format, ...) {
                 uitoa(va_char, buffer, 16);
                 x86_kprintf("0x%s", buffer);
                 break;
+            
+            case 'b' : /* Binary */
+                va_char = (int)va_arg(params, int);
+                uitoa(va_char, buffer, 2);
+                x86_kprintf("%sb", buffer);
 
             case 'n' : /* nothing (Param must be an int) */
                 va_char = (int)va_arg(params, int);
