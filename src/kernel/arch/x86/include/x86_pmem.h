@@ -18,18 +18,18 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#ifndef __KERNEL_H
-#define __KERNEL_H 1
+#ifndef __X86_PMEM_H
+#define __X86_PMEM_H 1
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <pmem.h>
 
-extern void* _start;
-extern void* _end;
+void* x86_pmem_alloc();
+void* x86_pmem_alloc_low();
+void x86_pmem_free(void* addr);
+void x86_pmem_lock_region(void* addr, uint32_t size);
+void x86_pmem_free_region(void* addr, uint32_t size);
+void x86_pmem_init(void* map_start, uint32_t size);
 
-#define _START ((void*)&_start)
-#define _END ((void*)&_end)
-
-#endif /* __KERNEL_H */
+#endif /* __X86_PMEM_H */
 

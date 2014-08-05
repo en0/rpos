@@ -18,7 +18,7 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <stdint.h>
+#include <x86_pmem.h>
 #include <string.h>
 #include <kprint.h>
 
@@ -70,6 +70,7 @@ uint32_t _map_end_page;
 
 void _lock_page(uint32_t page);
 void _free_page(uint32_t page);
+void* _alloc(uint32_t start);
 uint32_t _first_free_offset(uint32_t block);
 
 
@@ -101,7 +102,7 @@ void _free_page(uint32_t page) {
 
 /** Public Functions **/
 
-void pmem_init(void* map_start, uint32_t size) {
+void x86_pmem_init(void* map_start, uint32_t size) {
 
     // map_start is the _end of the kernel
     // size is the actual size of the system memory in KB.
@@ -119,7 +120,7 @@ void pmem_init(void* map_start, uint32_t size) {
     memset(_map_start, 0xFF, _map_size*sizeof(uint32_t));
 }
 
-void pmem_free_region(void* addr, uint32_t size) {
+void x86_pmem_free_region(void* addr, uint32_t size) {
     uint32_t first_page = TO_PAGE(addr),
              last_page = TO_PAGE((addr+size));
 
@@ -129,7 +130,7 @@ void pmem_free_region(void* addr, uint32_t size) {
     }
 }
 
-void pmem_lock_region(void* addr, uint32_t size) {
+void x86_pmem_lock_region(void* addr, uint32_t size) {
     uint32_t first_page = TO_PAGE(addr),
              last_page = TO_PAGE((addr+size-1));
     
@@ -139,20 +140,19 @@ void pmem_lock_region(void* addr, uint32_t size) {
     }while(first_page <= last_page);
 }
 
-void* pmem_alloc() {
+void* _alloc(uint32_t start) {
     uint32_t i, offset, page;
-    for(i = 0; i < _map_size; i++) {
+    for(i = GET_PAGE_INDEX(start); i < _map_size; i++)
         if(_map[i] < UINT32_MAX) {
             offset = _first_free_offset(_map[i]);
             page = GET_PAGE(i, offset);
             LOCK_PAGE(_map, i, offset);
             return TO_ADDR(page);
         }
-    }
     return NULL;
 }
 
-void pmem_free(void* addr) {
-    _free_page(TO_PAGE(addr));
-}
+void* x86_pmem_alloc_low() { return _alloc(0x00); }
+void* x86_pmem_alloc() { return _alloc(0x100); }
+void x86_pmem_free(void* addr) { _free_page(TO_PAGE(addr)); }
 

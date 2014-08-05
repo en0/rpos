@@ -107,9 +107,13 @@ void main(multiboot_info_t* bootinfo) {
 
     kprintf("Attempting to allocate some memory...\n");
     void* m = pmem_alloc();
+    char* x = (char*)m;
+    memcpy(m, "Hello, World!\0", 15);
 
     if(m == NULL) kprintf("Didnt work\n");
-    else kprintf("Got 1 page: %p", m);
+    else {
+        kprintf("Data stored in [%p]: %s", m, x);
+    }
 
     for(;;);
 }
