@@ -82,6 +82,10 @@ size_t strlen(const char* str);
 
 char* strrev(const char* str);
 
+char* strncat(char* destination, const char* s, size_t num);
+char* strcat(char* destination, const char* s);
+char* strncpy(char* destination, const char* s, size_t num);
+char* strcpy(char* destination, const char* s);
 
 #endif /** __STRING_H **/
 

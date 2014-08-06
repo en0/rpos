@@ -52,3 +52,30 @@ char* strrev(const char *str) {
     return (char*)str;
 }
 
+char* strcpy(char* destination, const char* s) {
+    char* d = (char*)destination;
+    for(;*s != '\0'; *d++ = *s++);
+    *d = '\0';
+    return destination;
+}
+
+char* strncpy(char* destination, const char* s, size_t num) {
+    char* d = (char*)destination;
+    for(;*s != '\0' && num > 0; *d++ = *s++, num--);
+    *d = '\0';
+    return destination;
+}
+
+char* strcat(char* destination, const char* s) {
+    char* d = (destination + strlen(destination));
+    for(;*s != '\0'; *d++ = *s++);
+    *d = '\0';
+    return destination;
+}
+
+char* strncat(char* destination, const char* s, size_t num) {
+    char* d = (destination + strlen(destination));
+    for(;*s != '\0' && num > 0; *d++ = *s++, num--);
+    *d = '\0';
+    return destination;
+}
