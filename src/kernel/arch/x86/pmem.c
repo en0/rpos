@@ -102,15 +102,20 @@ void _free_page(uint32_t page) {
 
 /** Public Functions **/
 
+void* x86_pmem_map_end(void* map_start, uint32_t size) {
+    return map_start + x86_pmem_page_size(size);
+}
+
 void x86_pmem_init(void* map_start, uint32_t size) {
 
     // map_start is the _end of the kernel
     // size is the actual size of the system memory in KB.
 
     _map_start = map_start;
-    _map_size = size>>7; //(((size * 1024)/4096)/32)
+    _map_size = x86_pmem_page_count(size);
 
-    _map_end = _map_start + (sizeof(uint32_t) * _map_size);
+    //_map_end = _map_start + x86_pmem_page_size(size);
+    _map_end = x86_pmem_map_end(map_start, size);
     _map = (uint32_t*)_map_start;
 
     _map_start_page = TO_PAGE(_map_start);

@@ -21,6 +21,7 @@
 #ifndef __PMEM_H
 #define __PMEM_H 1
 
+#include <config.h>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -55,11 +56,14 @@
 
 #ifdef ARCH_x86
 #include <x86_pmem.h>
+#define pmem_page_count x86_pmem_page_count
+#define pmem_page_size x86_pmem_page_size
 #define pmem_alloc x86_pmem_alloc
 #define pmem_alloc_low x86_pmem_alloc_low
 #define pmem_free x86_pmem_free
 #define pmem_lock_region x86_pmem_lock_region
 #define pmem_free_region x86_pmem_free_region
+#define pmem_map_end x86_pmem_map_end
 #define pmem_init x86_pmem_init
 #endif /** ARCH_x86 **/
 

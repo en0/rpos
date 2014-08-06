@@ -24,11 +24,15 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#define x86_pmem_page_count(kb) (kb>>7)
+#define x86_pmem_page_size(kb) ((kb>>7) * sizeof(uint32_t))
+
 void* x86_pmem_alloc();
 void* x86_pmem_alloc_low();
 void x86_pmem_free(void* addr);
 void x86_pmem_lock_region(void* addr, uint32_t size);
 void x86_pmem_free_region(void* addr, uint32_t size);
+void* x86_pmem_map_end(void* map_start, uint32_t size);
 void x86_pmem_init(void* map_start, uint32_t size);
 
 #endif /* __X86_PMEM_H */

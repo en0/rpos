@@ -24,6 +24,8 @@
 #define ARCH "@ARCH"
 #define ARCH_@ARCH 1
 
+#define STACK_SIZE @STACK_SIZE
+
 #define PROJNAME "@PROJNAME"
 #define PROFILE_@PROFILE 1
 

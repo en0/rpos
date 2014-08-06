@@ -17,7 +17,10 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
         .global _start
+        .global kabort
 
+        .extern find_stack
+        .extern system_init
         .extern main
         .extern x86_kprintf
         .extern x86_kclear
@@ -27,51 +30,76 @@
 
         .section .rodata
 
-halt_message:
-        .asciz "System Halted.\n"
-mboot_fail:
-        .asciz "Ooh Snap!\n\nYour bootloader does not appear to be multiboot complient.\n"
+unknown_error: .asciz "System failed to boot. I dont know why.\n"
+halt_message: .asciz "System Halted.\n"
+mboot_fail: .asciz "Ooh Snap!\n\nYour bootloader does not appear to be multiboot complient.\n"
+
+
+        .section .tstack, "aw", @nobits
+mbi:    .long 0x0
 
         .section .text
 
         ## Kernel Entry 
 
-_start: ## Validate boot loader is multiboot complient
-        cmp $VALID_MAGIC, %eax
-        jne _fail_mb
-
-        ## Setup The temp stack
+_start: ## Setup The temp stack
         movl $stack, %esp
 
         ## Reset EFLAGS
         pushl $0
         popf
 
+        ## Validate boot loader is multiboot complient
+        cmp $VALID_MAGIC, %eax
+        je .mbcomplient
+
+        ## If we get here then multiboot is not supported
+        ## abort with message
+        push $mboot_fail
+        call kabort
+
+.mbcomplient:
+
+        ## Backup MBI
+        mov %ebx, (mbi)
+
+        ## relocate stack
+        push mbi
+        call find_stack
+        mov %eax, %esp
+
         ## Install flat GDT
         nop
 
-        ## Call kmain(mboot*)
-        push %ebx
+        ## Clear screen for a pretty loader
         call x86_kclear
-        call main
 
-        ## System Halt Message
-_hlt:   push $halt_message
+        push mbi            ## We have a new stack, Repush the mbi
+        call system_init    ## Call system_init(mboot*)
+        call main           ## Call main(mboot*)
+
+        ## Failed Boot
+        push $unknown_error
+        call kabort
+
+
+kabort: push %ebp
+        mov %esp, %ebp
+        call x86_kclear
+        mov 0x8(%ebp), %eax
+        push %eax
+        call x86_kprintf
+        push $halt_message
         call x86_kprintf
         cli
         hlt
 
         ## Safty loop
-_hang:  jmp _hang
-
-_fail_mb:
-        call x86_kclear
-        push $mboot_fail
-        call x86_kprintf
-        jmp _hlt
+.hang:  jmp .hang
 
         ## Allocate a 16K temporary stack that will get the job done
         ## untill we can get memory management setup.
         .section .tstack, "aw", @nobits
-        .skip 16384
+        .skip 512 ## Don't need much room here.
 stack:  nop
+
