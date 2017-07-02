@@ -33,7 +33,7 @@ SUBDIRS = src/kernel
 
 # Some Utilities
 GENCONFIG=$(TOP)/scripts/genconfig.py
-QEMU=qemu-system-x86_64 -m 10
+QEMU=qemu-system-i386 -m 10
 
 ## END REGION: GLOBAL
 

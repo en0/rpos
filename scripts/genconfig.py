@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 
 ## Copyright (c) 2014 "Ian Laird"
 ## Research Project Operating System (rpos) - https://github.com/en0/rpos
