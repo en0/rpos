@@ -1,4 +1,6 @@
 src/testing*
+scripts/toolchain*
+.gdb_history
 # Object files
 *.o
 *.ko
