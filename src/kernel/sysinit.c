@@ -20,6 +20,7 @@
 
 #include <multiboot.h>
 #include <pmem.h>
+#include <vmem.h>
 
 /** 
  ** _start and _end are exposed via linker script 
@@ -124,8 +125,13 @@ void init_pmem(multiboot_info_t* mbi) {
     pmem_lock_region(0x00, 4096);
 }
 
+void init_vmem() {
+
+}
+
 void system_init(multiboot_info_t* mbi) {
     validate_boot_env(mbi);
     init_pmem(mbi);
+    init_vmem();
 }
 
