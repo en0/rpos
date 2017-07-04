@@ -27,7 +27,24 @@
 
 #ifdef ARCH_x86
 #include <x86_vmem.h>
-/* define here */
+
+#define phys_addr           x86_phys_addr
+#define virt_addr           x86_virt_addr
+
+#define VMEM_PRESENT        x86_VMEM_PRESENT
+#define VMEM_WRITABLE       x86_VMEM_WRITABLE
+#define VMEM_USER           x86_VMEM_USER
+#define VMEM_WRITETHROUGH   x86_VMEM_WRITETHROUGH
+#define VMEM_NOT_CACHEABLE  x86_VMEM_NOT_CACHEABLE
+#define VMEM_ACCESSED       x86_VMEM_ACCESSED
+#define VMEM_DIRT           x86_VMEM_DIRT
+#define VMEM_PAT            x86_VMEM_PAT
+#define VMEM_CPU_GLOBAL     x86_VMEM_CPU_GLOBAL
+#define VMEM_LV4_GLOBAL     x86_VMEM_LV4_GLOBAL
+
+#define vmem_init           x86_vmem_init
+#define vmem_mmap           x86_vmem_mmap
+
 #endif /** ARCH_x86 **/
 
 #endif /* __VMEM_H */

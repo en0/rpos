@@ -19,6 +19,7 @@
  **/
 
 #include <x86_vmem.h>
+#include <x86_pmem.h>
 #include <string.h>
 #include <kprint.h>
 
@@ -27,25 +28,85 @@
  ** We are still figuring out how this works.
  **/
 
-#define PTE_MASK_PRESENT        0b0000000000000000000000000000001
-#define PTE_MASK_WRITABLE       0b0000000000000000000000000000010
-#define PTE_MASK_USER           0b0000000000000000000000000000100
-#define PTE_MASK_WRITETHROUGH   0b0000000000000000000000000001000
-#define PTE_MASK_NOT_CACHEABLE  0b0000000000000000000000000010000
-#define PTE_MASK_ACCESSED       0b0000000000000000000000000100000
-#define PTE_MASK_DIRTY          0b0000000000000000000000001000000
-#define PTE_MASK_PAT            0b0000000000000000000000010000000
-#define PTE_MASK_CPU_GLOBAL     0b0000000000000000000000100000000
-#define PTE_MASK_LV4_GLOBAL     0b0000000000000000000001000000000
-#define PTE_MASK_FRAME          0b1111111111111111111000000000000
+/* Proto type */
+void _x86_map_page(x86_virt_addr, x86_phys_addr, uint32_t);
+x86_phys_addr* _x86_allocate_entry(uint32_t*, uint32_t, uint32_t);
+x86_phys_addr* _x86_get_phys_addr(uint32_t*, uint32_t);
 
-typedef uint32_t pt_entry;
+#define PAGE_FRAME_MASK      0b11111111111111111111000000000000
+#define PAGE_ATTRS_MASK      0b00000000000000000000001111111111
+#define TABLE_INDEX_MASK     0b00000000001111111111000000000000
+#define TABLE_DIRECTORY_MASK 0b11111111110000000000000000000000
 
-//void pt_entry_add_attrib (pt_entry* e, uint32_t attrib);
-//void pt_entry_del_attrib (pt_entry* e, uint32_t attrib);
-//void pt_entry_set_frame (pt_entry*, physical_addr);
-//bool pt_entry_is_present (pt_entry e);
-//bool pt_entry_is_writable (pt_entry e);
-//physical_addr pt_entry_pfn (pt_entry e);
+#define GET_DIRECTORY_INDEX(a) ((a & TABLE_DIRECTORY_MASK)>>22)
+#define GET_TABLE_INDEX(a) ((a & TABLE_INDEX_MASK)>>12)
+
+#define GET_FLAG(entry, attr) (entry & attr)
+#define SET_FLAG(entry, attr) (entry |= attr)
+#define DEL_FLAG(entry, attr) (entry &= ~(attr))
+#define IS_FLAG(entry, attr) (GET_FLAG(entry, attr) == attr)
+
+#define PDE_SIZE 1024
+#define PDT_SIZE (sizeof(pdt_entry_t) * PDE_SIZE)
+
+typedef uint32_t pdt_entry_t;
+
+uint32_t* _pdt;
+
+void* x86_vmem_init() {
+
+    // Allocate physical memory to hold the page directory table.
+    _pdt = x86_pmem_alloc();
+
+    // write zeros to memory so that all pages are NOT present.
+    memset(_pdt, 0x00, PDT_SIZE);
+
+    // Map virtual to physcal address for the PDT location.
+    x86_vmem_mmap((x86_virt_addr)_pdt, PDT_SIZE, 0, (x86_phys_addr*)_pdt);
+
+    return (void*)_pdt;
+}
+
+x86_virt_addr* x86_vmem_mmap(x86_virt_addr vaddr, size_t length, uint32_t flags, x86_phys_addr* paddr) {
+
+    x86_virt_addr vbase;
+    x86_phys_addr pbase;
+
+    // if(vaddr == null)
+    //   vaddr = find_first_fit(pageCount);
+    // else
+
+    for(vbase = vaddr & 0xFFFFF000, pbase = (x86_phys_addr)paddr & 0xFFFFF000;
+        vbase < vaddr + length;
+        _x86_map_page(vbase, pbase, flags), vbase+=0x1000, pbase+=0x1000);
+
+    return (x86_virt_addr*)(vaddr & 0xFFFFF000);
+}
+
+void _x86_map_page(x86_virt_addr vaddr, x86_phys_addr paddr, uint32_t flags) {
+
+    x86_phys_addr* table;
+    uint32_t dIndex = GET_DIRECTORY_INDEX(vaddr);
+    uint32_t tIndex = GET_TABLE_INDEX(vaddr);
+
+    kprintf("Mapping page: %p => %p (T:%i,P:%i)\n", vaddr, paddr, dIndex, tIndex);
+
+    table = _x86_allocate_entry(_pdt, dIndex, flags);
+    _x86_allocate_entry(table, tIndex, flags);
+}
+
+x86_phys_addr* _x86_allocate_entry(uint32_t* base, uint32_t index, uint32_t flags) {
+
+    if(IS_FLAG(base[index], x86_VMEM_PRESENT))
+        return _x86_get_phys_addr(base, index);
+
+    void* m = x86_pmem_alloc();
+    base[index] = ((uint32_t)m & PAGE_FRAME_MASK) | flags | x86_VMEM_PRESENT;
+    return (x86_phys_addr*)m;
+}
+
+x86_phys_addr* _x86_get_phys_addr(uint32_t* base, uint32_t index) {
+    return (x86_phys_addr*)(base[index] & PAGE_FRAME_MASK);
+}
 
 /** Macros to interact with the memory map. **/

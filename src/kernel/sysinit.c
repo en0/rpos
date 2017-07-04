@@ -21,6 +21,7 @@
 #include <multiboot.h>
 #include <pmem.h>
 #include <vmem.h>
+#include <kprint.h>
 
 /** 
  ** _start and _end are exposed via linker script 
@@ -125,13 +126,21 @@ void init_pmem(multiboot_info_t* mbi) {
     pmem_lock_region(0x00, 4096);
 }
 
-void init_vmem() {
+void init_vmem(multiboot_info_t* mbi) {
 
+    void* STACK_END = find_stack(mbi);
+    void* pdt = vmem_init();
+
+    vmem_mmap((virt_addr)_START, (STACK_END - _START), 0, (phys_addr*)_START);
+
+    kprintf("Setting up PDT at: %p\n\n", pdt);
+
+    // Enable paging.
 }
 
 void system_init(multiboot_info_t* mbi) {
     validate_boot_env(mbi);
     init_pmem(mbi);
-    init_vmem();
+    init_vmem(mbi);
 }
 
