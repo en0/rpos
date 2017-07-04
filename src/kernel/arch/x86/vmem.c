@@ -30,7 +30,7 @@
 
 /* Proto type */
 void _x86_map_page(x86_virt_addr, x86_phys_addr, uint32_t);
-x86_phys_addr* _x86_allocate_entry(uint32_t*, uint32_t, uint32_t);
+x86_phys_addr* _x86_allocate_page_table(uint32_t, uint32_t);
 x86_phys_addr* _x86_get_phys_addr(uint32_t*, uint32_t);
 
 #define PAGE_FRAME_MASK      0b11111111111111111111000000000000
@@ -76,6 +76,7 @@ x86_virt_addr* x86_vmem_mmap(x86_virt_addr vaddr, size_t length, uint32_t flags,
     //   vaddr = find_first_fit(pageCount);
     // else
 
+    // Loop over the pages in the given address range and map each.
     for(vbase = vaddr & 0xFFFFF000, pbase = (x86_phys_addr)paddr & 0xFFFFF000;
         vbase < vaddr + length;
         _x86_map_page(vbase, pbase, flags), vbase+=0x1000, pbase+=0x1000);
@@ -85,23 +86,31 @@ x86_virt_addr* x86_vmem_mmap(x86_virt_addr vaddr, size_t length, uint32_t flags,
 
 void _x86_map_page(x86_virt_addr vaddr, x86_phys_addr paddr, uint32_t flags) {
 
-    x86_phys_addr* table;
+    // TODO: Make this check the target so we do not reallocate a virt_addr
+    // that is already in use.
+
+    // Get the indexes for the page tables from the virtual address.
     uint32_t dIndex = GET_DIRECTORY_INDEX(vaddr);
     uint32_t tIndex = GET_TABLE_INDEX(vaddr);
 
-    kprintf("Mapping page: %p => %p (T:%i,P:%i)\n", vaddr, paddr, dIndex, tIndex);
+    // lookup (or allocate) the page table address.
+    x86_phys_addr* table = _x86_allocate_page_table(dIndex, flags);
 
-    table = _x86_allocate_entry(_pdt, dIndex, flags);
-    _x86_allocate_entry(table, tIndex, flags);
+    // Set the page table target to the given physical address.
+    table[tIndex] = (paddr & PAGE_FRAME_MASK) | flags | x86_VMEM_PRESENT;
+
+    kprintf("Mapped page: %p => %p (T:%i,P:%i)\n", vaddr, paddr, dIndex, tIndex);
 }
 
-x86_phys_addr* _x86_allocate_entry(uint32_t* base, uint32_t index, uint32_t flags) {
+x86_phys_addr* _x86_allocate_page_table(uint32_t index, uint32_t flags) {
 
-    if(IS_FLAG(base[index], x86_VMEM_PRESENT))
-        return _x86_get_phys_addr(base, index);
+    if(IS_FLAG(_pdt[index], x86_VMEM_PRESENT))
+        return _x86_get_phys_addr(_pdt, index);
 
     void* m = x86_pmem_alloc();
-    base[index] = ((uint32_t)m & PAGE_FRAME_MASK) | flags | x86_VMEM_PRESENT;
+    memset(m, 0x00, PDT_SIZE);
+
+    _pdt[index] = ((uint32_t)m & PAGE_FRAME_MASK) | flags | x86_VMEM_PRESENT;
     return (x86_phys_addr*)m;
 }
 
