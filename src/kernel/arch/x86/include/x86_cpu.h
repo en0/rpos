@@ -18,4 +18,8 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <x86_cpu.h>
+#ifndef __X86_CPU_H
+#define __X86_CPU_H 1
+
+#endif /* __X86_CPU_H */
+

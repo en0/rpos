@@ -44,6 +44,7 @@
 
 #define vmem_init           x86_vmem_init
 #define vmem_mmap           x86_vmem_mmap
+#define vmem_enable         x86_vmem_enable
 
 #endif /** ARCH_x86 **/
 

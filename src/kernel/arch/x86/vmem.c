@@ -20,6 +20,7 @@
 
 #include <x86_vmem.h>
 #include <x86_pmem.h>
+#include <x86_cpu.h>
 #include <string.h>
 #include <kprint.h>
 
@@ -82,6 +83,11 @@ x86_virt_addr* x86_vmem_mmap(x86_virt_addr vaddr, size_t length, uint32_t flags,
         _x86_map_page(vbase, pbase, flags), vbase+=0x1000, pbase+=0x1000);
 
     return (x86_virt_addr*)(vaddr & 0xFFFFF000);
+}
+
+void x86_vmem_enable() {
+    //cr3 = _pdt;
+    //cr0 |= 0x80000001;
 }
 
 void _x86_map_page(x86_virt_addr vaddr, x86_phys_addr paddr, uint32_t flags) {

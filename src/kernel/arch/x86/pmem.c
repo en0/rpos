@@ -19,6 +19,7 @@
  **/
 
 #include <x86_pmem.h>
+#include <x86_cpu.h>
 #include <string.h>
 #include <kprint.h>
 
