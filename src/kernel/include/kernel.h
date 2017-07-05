@@ -23,7 +23,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <pmem.h>
+#include <vmem.h>
 
 extern void* _start;
 extern void* _end;

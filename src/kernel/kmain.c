@@ -33,10 +33,11 @@ void main(multiboot_info_t* bootinfo) {
             "Kernel ends at %p\n",
             &_start, &_end);
 
-    kprintf("HOLY SHIT - Paging!");
-    /*
+    //kprintf("HOLY SHIT - Paging!");
     kprintf("Attempting to allocate some memory...\n");
-    void* m = pmem_alloc();
+    void* m = vmem_alloc(8193, 0x00);
+    kprintf("Allocated some space at [%p]", m);
+    /*
     char* x = (char*)m;
     memset(m, 0x00, 4096);
 

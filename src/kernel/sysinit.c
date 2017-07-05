@@ -103,12 +103,15 @@ void validate_boot_env(multiboot_info_t* mbi) {
     }
 }
 
-void init_pmem(multiboot_info_t* mbi) {
+void init_memory_manager(multiboot_info_t* mbi) {
 
+    // Locate the tail end of used memory
     void* STACK_END = find_stack(mbi);
 
+    // Initialize the memory management bit map for physical memory.
     pmem_init(_END, (mbi->mem_upper + mbi->mem_lower));
 
+    // Free regions that the bios tells us we have available.
     multiboot_memory_map_t *mmap;
     for (mmap = (multiboot_memory_map_t *) mbi->mmap_addr;
         (unsigned long) mmap < mbi->mmap_addr + mbi->mmap_length;
@@ -124,17 +127,15 @@ void init_pmem(multiboot_info_t* mbi) {
 
     // Lock the first page. it just messes up NULL checking
     pmem_lock_region(0x00, 4096);
-}
 
-void init_vmem(multiboot_info_t* mbi) {
+    // Initialize paging data structures.
+    vmem_init();
 
-    void* STACK_END = find_stack(mbi);
-    void* pdt = vmem_init();
+    // Map kernel memory, the memory map, and the stack region.
+    vmem_map_region((virt_addr)_START, (STACK_END - _START), VMEM_WRITABLE, (phys_addr*)_START);
 
-    vmem_mmap((virt_addr)_START, (STACK_END - _START), VMEM_WRITABLE, (phys_addr*)_START);
-    vmem_mmap((virt_addr)0xB8000, 4096, VMEM_WRITABLE, (phys_addr*)0xB8000);
-
-    kprintf("Setting up PDT at: %p\n\n", pdt);
+    // Map video memory so we can still print to the screen.
+    vmem_map_region((virt_addr)0xB8000, 4096, VMEM_WRITABLE, (phys_addr*)0xB8000);
 
     // Enable paging.
     vmem_enable();
@@ -142,7 +143,6 @@ void init_vmem(multiboot_info_t* mbi) {
 
 void system_init(multiboot_info_t* mbi) {
     validate_boot_env(mbi);
-    init_pmem(mbi);
-    init_vmem(mbi);
+    init_memory_manager(mbi);
 }
 

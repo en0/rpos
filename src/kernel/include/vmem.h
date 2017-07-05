@@ -43,8 +43,9 @@
 #define VMEM_LV4_GLOBAL     x86_VMEM_LV4_GLOBAL
 
 #define vmem_init           x86_vmem_init
-#define vmem_mmap           x86_vmem_mmap
+#define vmem_map_region     x86_vmem_map_region
 #define vmem_enable         x86_vmem_enable
+#define vmem_alloc          x86_vmem_alloc
 
 #endif /** ARCH_x86 **/
 

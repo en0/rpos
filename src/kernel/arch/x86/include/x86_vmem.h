@@ -41,7 +41,8 @@ typedef uint32_t x86_virt_addr;
 
 void* x86_vmem_init();
 void x86_vmem_enable();
-x86_virt_addr* x86_vmem_mmap(x86_virt_addr, size_t, uint32_t, x86_phys_addr*);
+x86_virt_addr* x86_vmem_map_region(x86_virt_addr, size_t, uint32_t, x86_phys_addr*);
+void* x86_vmem_alloc(size_t, uint32_t);
 
 #endif /* __X86_VMEM_H */
 
