@@ -131,11 +131,13 @@ void init_vmem(multiboot_info_t* mbi) {
     void* STACK_END = find_stack(mbi);
     void* pdt = vmem_init();
 
-    vmem_mmap((virt_addr)_START, (STACK_END - _START), 0, (phys_addr*)_START);
+    vmem_mmap((virt_addr)_START, (STACK_END - _START), VMEM_WRITABLE, (phys_addr*)_START);
+    vmem_mmap((virt_addr)0xB8000, 4096, VMEM_WRITABLE, (phys_addr*)0xB8000);
 
     kprintf("Setting up PDT at: %p\n\n", pdt);
 
     // Enable paging.
+    vmem_enable();
 }
 
 void system_init(multiboot_info_t* mbi) {

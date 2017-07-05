@@ -33,6 +33,8 @@ void main(multiboot_info_t* bootinfo) {
             "Kernel ends at %p\n",
             &_start, &_end);
 
+    kprintf("HOLY SHIT - Paging!");
+    /*
     kprintf("Attempting to allocate some memory...\n");
     void* m = pmem_alloc();
     char* x = (char*)m;
@@ -49,6 +51,7 @@ void main(multiboot_info_t* bootinfo) {
     else {
         kprintf("Data stored in [%p]: %s", m, x);
     }
+    */
 
     for(;;);
 }

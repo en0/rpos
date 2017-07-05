@@ -88,6 +88,15 @@ x86_virt_addr* x86_vmem_mmap(x86_virt_addr vaddr, size_t length, uint32_t flags,
 void x86_vmem_enable() {
     //cr3 = _pdt;
     //cr0 |= 0x80000001;
+
+    asm("mov %0, %%cr3;"
+        "mov %%cr0, %%eax;"
+        "or %1, %%eax;"
+        "mov %%eax, %%cr0;" 
+        : /* no output */
+        : "r"((uint32_t)_pdt), "r"(0x80000001)
+        : "%eax" );
+
 }
 
 void _x86_map_page(x86_virt_addr vaddr, x86_phys_addr paddr, uint32_t flags) {
