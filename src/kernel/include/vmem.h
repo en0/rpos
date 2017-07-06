@@ -28,24 +28,30 @@
 #ifdef ARCH_x86
 #include <x86_vmem.h>
 
-#define phys_addr           x86_phys_addr
-#define virt_addr           x86_virt_addr
+/* Types */
+#define vmem_context            x86_vmem_context;
+#define phys_addr               x86_phys_addr
+#define virt_addr               x86_virt_addr
 
-#define VMEM_PRESENT        x86_VMEM_PRESENT
-#define VMEM_WRITABLE       x86_VMEM_WRITABLE
-#define VMEM_USER           x86_VMEM_USER
-#define VMEM_WRITETHROUGH   x86_VMEM_WRITETHROUGH
-#define VMEM_NOT_CACHEABLE  x86_VMEM_NOT_CACHEABLE
-#define VMEM_ACCESSED       x86_VMEM_ACCESSED
-#define VMEM_DIRT           x86_VMEM_DIRT
-#define VMEM_PAT            x86_VMEM_PAT
-#define VMEM_CPU_GLOBAL     x86_VMEM_CPU_GLOBAL
-#define VMEM_LV4_GLOBAL     x86_VMEM_LV4_GLOBAL
+/* FLAGS */
+#define VMEM_FLG_PRESENT        x86_FLG_VMEM_PRESENT
+#define VMEM_FLG_WRITABLE       x86_FLG_VMEM_WRITABLE
+#define VMEM_FLG_SUPERVISOR     x86_FLG_VMEM_SUPERVISOR
+#define VMEM_FLG_WRITETHROUGH   x86_FLG_VMEM_WRITETHROUGH
+#define VMEM_FLG_NOT_CACHEABLE  x86_FLG_VMEM_NOT_CACHEABLE
+#define VMEM_FLG_ACCESSED       x86_FLG_VMEM_ACCESSED
+#define VMEM_FLG_RESEVED        x86_FLG_VMEM_RESEVED
+#define VMEM_FLG_SIZE           x86_FLG_VMEM_SIZE
+#define VMEM_FLG_GLOBAL         x86_FLG_VMEM_GLOBAL
+#define VMEM_FLG_COPY           x86_FLG_VMEM_COPY
 
-#define vmem_init           x86_vmem_init
-#define vmem_map_region     x86_vmem_map_region
-#define vmem_enable         x86_vmem_enable
-#define vmem_alloc          x86_vmem_alloc
+/* METHODS */
+#define vmem_init               x86_vmem_init
+#define vmem_copy_context       x86_vmem_copy_context
+#define vmem_destroy_context    x86_vmem_destroy_context
+#define vmem_kalloc             x86_vmem_kalloc
+#define vmem_kfree              x86_vmem_kfree
+#define vmem_map_region         x86_vmem_map_region
 
 #endif /** ARCH_x86 **/
 

@@ -18,66 +18,150 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-/*
- * Ok, the real plan for this.
- *
- * 1. vmem_init(vbase, pbase, length) should initialize the kernel space page 
- *    directory and map the given region: This is to map kernel memory. This
- *    function will also install the kernel pdt and turn on paging and return
- *    the newly created pdt*.
- *
- * 2. vmem_create_directory(pdt*) will create a copy of pdt* and return a new 
- *    directory pointer. This new pdt* can then be used to allocate additional
- *    space for the new context.
- *
- * 3. vmm_destroy_directory(pdt*) will find all allocated space owned by this
- *    directory and free each page with pmem_free. Then the pdt entry will be
- *    removed.
- *
- * 4. vmem_kalloc(pdt*, virt_addr, length, flags) will allocate a `length` byte
- *    region of memory at `virt_addr` through pdt* directory. If virt_addr is
- *    NULL, vmem will find the first fit.
- *
- * 5. vmem_kfree(pdt*, virt_addr, length) will unmap the given page entry
- *    pointed to by virt_addr. If the page is not a COPY, the physical memory
- *    will also be freed with pmem_free
- *
- * 6. vmem_map_region(pdt*, virt_addr, phys_addr, length) will indiscrimatly
- *    map a virtual address to a physical address through pdt*. This is for
- *    static memory locations like video memory or the bios.
- *
- * X. Add a few os specific flags for things like flagging a page that should
- *    be deleted when a pdt is destroyed.
- *    - IS_ENTRY_COPY - when we do the copy we can mask this bit out.
- *
- * NOTE: If additional kernel memory is needed, it can be allocated but any
- * directories created before this allocation will not have them mapped in
- * there copy. This could be problematic depending on what steps the context
- * switching goes through.
- *
- * Everything that exists right now was just to understand the way paging
- * worked and how to set it up.
- */
+/**
+ ** Virtual Memory Manager
+ ** We are still figuring out how this works but here is the plan
+ **
+ ** vmem_init(vbase, pbase, length) should initialize the kernel space page 
+ ** directory and map the given region: This is to map kernel memory. This
+ ** function will also install the kernel pdt and turn on paging and return
+ ** the newly created pdt*.
+ **
+ ** vmem_copy_context(ctx*) will create a copy of pdt* and return a new 
+ ** directory pointer. This new pdt* can then be used to allocate additional
+ ** space for the new context.
+ **
+ ** vmm_destroy_context(ctx*) will find all allocated space owned by this
+ ** directory and free each page with pmem_free. Then the pdt entry will be
+ ** removed.
+ **
+ ** vmem_kalloc(pdt*, virt_addr, length, flags) will allocate a `length` byte
+ ** region of memory at `virt_addr` through pdt* directory. If virt_addr is
+ ** NULL, vmem will find the first fit.
+ **
+ ** vmem_kfree(pdt*, virt_addr, length) will unmap the given page entry
+ ** pointed to by virt_addr. If the page is not a COPY, the physical memory
+ ** will also be freed with pmem_free
+ **
+ ** vmem_map_region(pdt*, virt_addr, phys_addr, length) will indiscrimatly
+ ** map a virtual address to a physical address through pdt*. This is for
+ ** static memory locations like video memory or the bios.
+ **
+ ** Add a few os specific flags for things like flagging a page that should
+ ** be deleted when a pdt is destroyed.
+ ** - x86_VMEM_COPY - when we do the copy we can mask this bit out.
+ **
+ ** NOTE: If additional kernel memory is needed, it can be allocated but any
+ ** directories created before this allocation will not have them mapped in
+ ** there copy. This could be problematic depending on what steps the context
+ ** switching goes through.
+ **
+ ** Everything that exists right now was just to understand the way paging
+ ** worked and how to set it up.
+ **/
 
 #include <x86_vmem.h>
 #include <x86_pmem.h>
-#include <x86_cpu.h>
 #include <string.h>
 #include <kprint.h>
 
-/**
- ** Virtual Memory Manager
- ** We are still figuring out how this works.
- **/
+x86_vmem_context* x86_vmem_init(x86_virt_addr* vaddr, x86_phys_addr* paddr, size_t len) {
 
-/* Proto type */
+    /*
+     * vmem_init(vbase, pbase, length) should initialize the kernel space page 
+     * directory and map the given region: This is to map kernel memory. This
+     * function will also install the kernel pdt and turn on paging and return
+     * the newly created pdt*.
+     */
+
+    x86_vmem_context* ctx = x86_pmem_alloc();
+    x86_virt_addr vbase, pbase;
+    uint32_t flags = x86_FLG_VMEM_PRESENT | x86_FLG_VMEM_WRITABLE | x86_FLG_VMEM_SUPERVISOR;
+
+    memset((void*)ctx, 0x00, x86_PMEM_PAGE_SIZE);
+
+    // Loop over the pages in the given address range and map each.
+    for(vbase = (x86_virt_addr)vaddr & 0xFFFFF000, 
+        pbase = (x86_virt_addr)paddr & 0xFFFFF000;
+        vbase < (uint32_t)vaddr + len;
+        _x86_map_page(ctx, vbase, pbase, flags),
+        vbase += x86_PMEM_PAGE_SIZE,
+        pbase += x86_PMEM_PAGE_SIZE); 
+
+    return (x86_vmem_context*)ctx;
+}
+
+x86_vmem_context* x86_vmem_copy_context(x86_vmem_context* ctx) {
+
+    /*
+     * vmem_copy_context(ctx*) will create a copy of pdt* and return a new 
+     * directory pointer. This new pdt* can then be used to allocate additional
+     * space for the new context.
+     */
+
+    return (x86_vmem_context*)NULL;
+}
+
+void x86_vmem_destroy_context(x86_vmem_context* ctx) {
+
+    /*
+     * vmm_destroy_context(ctx*) will find all allocated space owned by this
+     * directory and free each page with pmem_free. Then the pdt entry will be
+     * removed.
+     */
+
+}
+
+x86_virt_addr* x86_vmem_kalloc(x86_vmem_context* ctx, x86_virt_addr* vaddr, size_t len, uint32_t flags) {
+
+    /*
+     * vmem_kalloc(pdt*, virt_addr, length, flags) will allocate a `length` byte
+     * region of memory at `virt_addr` through pdt* directory. If virt_addr is
+     * NULL, vmem will find the first fit.
+     */
+
+    return (x86_virt_addr*)NULL;
+}
+
+void x86_vmem_kfree(x86_vmem_context* ctx, x86_virt_addr* vaddr, size_t len) {
+
+    /*
+     * vmem_kfree(pdt*, virt_addr, length) will unmap the given page entry
+     * pointed to by virt_addr. If the page is not a COPY, the physical memory
+     * will also be freed with pmem_free
+     */
+
+}
+
+void x86_vmem_map_region(x86_vmem_context* ctx, x86_virt_addr* vaddr, x86_phys_addr* paddr, size_t len) {
+
+    /*
+     * vmem_map_region(pdt*, virt_addr, phys_addr, length) will indiscriminately
+     * map a virtual address to a physical address through pdt*. This is for
+     * static memory locations like video memory or the bios.
+     */
+
+}
+
+/** PRIVATE METHODS **********************************************************/
+
+void _x86_map_page(x86_vmem_context* ctx, x86_virt_addr vaddr, x86_phys_addr paddr, uint32_t flags) {
+
+    /*
+     * _x86_map_page(ctx,vaddr,paddr,flags) will indiscriminately map the given
+     * physical page to the given virtual address with the given flags.
+     */
+
+}
+
+/*
 void _x86_map_page(x86_virt_addr, x86_phys_addr, uint32_t);
 x86_phys_addr* _x86_allocate_page_table(uint32_t, uint32_t);
 x86_phys_addr* _x86_get_phys_addr(uint32_t*, uint32_t);
 x86_virt_addr _x86_find_first(uint32_t);
 
 #define PAGE_FRAME_MASK      0b11111111111111111111000000000000
-#define PAGE_ATTRS_MASK      0b00000000000000000000001111111111
+#define PAGE_ATTRS_MASK      0b00000000000000000000111111111111
 #define TABLE_INDEX_MASK     0b00000000001111111111000000000000
 #define TABLE_DIRECTORY_MASK 0b11111111110000000000000000000000
 
@@ -89,15 +173,11 @@ x86_virt_addr _x86_find_first(uint32_t);
 #define DEL_FLAG(entry, attr) (entry &= ~(attr))
 #define IS_FLAG(entry, attr) (GET_FLAG(entry, attr) == attr)
 
-#define PAGE_SIZE 0x1000
-#define PDE_SIZE 1024
-#define PDT_SIZE (sizeof(pdt_entry_t) * PDE_SIZE)
-
-typedef uint32_t pdt_entry_t;
+#define PDT_SIZE (sizeof(pdt_entry_t) * 1024)
 
 uint32_t* _pdt;
 
-void* x86_vmem_init() {
+void* old_vmem_init() {
 
     // Allocate physical memory to hold the page directory table.
     _pdt = x86_pmem_alloc();
@@ -127,7 +207,7 @@ x86_virt_addr* x86_vmem_map_region(x86_virt_addr vaddr, size_t length, uint32_t 
 void* x86_vmem_alloc(size_t length, uint32_t flags) {
 
     uint32_t pageCount = length / PAGE_SIZE;
-    x86_virt_addr vaddr;
+    x86_virt_addr vbase, vaddr;
 
     // compute number of pages.
     if((length % PAGE_SIZE) > 0)
@@ -138,8 +218,8 @@ void* x86_vmem_alloc(size_t length, uint32_t flags) {
     // find the first fit.
     vaddr = _x86_find_first(pageCount);
 
-    for(vbase = vaddr; vbase < vaddr + length; vbase+=PAGE_SIZE)
-        _x86_map_page(vbase, (x86_phys_addr)x86_pmem_alloc(), flags);
+    //for(vbase = vaddr; vbase < vaddr + length; vbase+=PAGE_SIZE)
+        //_x86_map_page(vbase, (x86_phys_addr)x86_pmem_alloc(), flags);
 
     return (void*)vaddr;
 }
@@ -153,7 +233,7 @@ void x86_vmem_enable() {
         "mov %%cr0, %%eax;"
         "or %1, %%eax;"
         "mov %%eax, %%cr0;"
-        : /* no output */
+        : // no output
         : "r"((uint32_t)_pdt), "r"(0x80000001)
         : "%eax" );
 
@@ -202,5 +282,6 @@ x86_phys_addr* _x86_allocate_page_table(uint32_t index, uint32_t flags) {
 x86_phys_addr* _x86_get_phys_addr(uint32_t* base, uint32_t index) {
     return (x86_phys_addr*)(base[index] & PAGE_FRAME_MASK);
 }
+*/
 
 /** Macros to interact with the memory map. **/

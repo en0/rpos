@@ -24,6 +24,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#define x86_PMEM_PAGE_SIZE 0x1000
+
 #define x86_pmem_page_count(kb) (kb>>7)
 #define x86_pmem_page_size(kb) ((kb>>7) * sizeof(uint32_t))
 

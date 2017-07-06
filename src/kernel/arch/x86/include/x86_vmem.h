@@ -25,24 +25,30 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define x86_VMEM_PRESENT        0b00000000001
-#define x86_VMEM_WRITABLE       0b00000000010
-#define x86_VMEM_USER           0b00000000100
-#define x86_VMEM_WRITETHROUGH   0b00000001000
-#define x86_VMEM_NOT_CACHEABLE  0b00000010000
-#define x86_VMEM_ACCESSED       0b00000100000
-#define x86_VMEM_DIRTY          0b00001000000
-#define x86_VMEM_PAT            0b00010000000
-#define x86_VMEM_CPU_GLOBAL     0b00100000000
-#define x86_VMEM_LV4_GLOBAL     0b01000000000
+/* Flags */
+#define x86_FLG_VMEM_PRESENT        0b00000000001
+#define x86_FLG_VMEM_WRITABLE       0b00000000010
+#define x86_FLG_VMEM_SUPERVISOR     0b00000000100
+#define x86_FLG_VMEM_WRITETHROUGH   0b00000001000
+#define x86_FLG_VMEM_NOT_CACHEABLE  0b00000010000
+#define x86_FLG_VMEM_ACCESSED       0b00000100000
+#define x86_FLG_VMEM_RESEVED        0b00001000000
+#define x86_FLG_VMEM_SIZE           0b00010000000
+#define x86_FLG_VMEM_GLOBAL         0b00100000000
+#define x86_FLG_VMEM_COPY           0b01000000000
 
-typedef uint32_t x86_phys_addr;
+/* Types */
+typedef uint32_t x86_vmem_context;
 typedef uint32_t x86_virt_addr;
+typedef uint32_t x86_phys_addr;
 
-void* x86_vmem_init();
-void x86_vmem_enable();
-x86_virt_addr* x86_vmem_map_region(x86_virt_addr, size_t, uint32_t, x86_phys_addr*);
-void* x86_vmem_alloc(size_t, uint32_t);
+/* Methods */
+x86_vmem_context* x86_vmem_init(x86_virt_addr*, x86_phys_addr*, size_t);
+x86_vmem_context* x86_vmem_copy_context(x86_vmem_context*);
+void x86_vmem_destroy_context(x86_vmem_context*);
+x86_virt_addr* x86_vmem_kalloc(x86_vmem_context*, x86_virt_addr*, size_t, uint32_t);
+void x86_vmem_kfree(x86_vmem_context*, x86_virt_addr*, size_t);
+void x86_vmem_map_region(x86_vmem_context*, x86_virt_addr*, x86_phys_addr*, size_t);
 
 #endif /* __X86_VMEM_H */
 
