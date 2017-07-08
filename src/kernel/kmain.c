@@ -30,27 +30,25 @@ void main(multiboot_info_t* bootinfo) {
 
     kprintf("Research Porject Kernel\n"
             "Kernel starts at %p\n"
-            "Kernel ends at %p\n",
+            "Kernel ends at %p\n"
+            "Paging is enabled!\n",
             &_start, &_end);
 
-    /*
-    void* m = vmem_alloc(8193, 0x00);
-    kprintf("Allocated some space at [%p]", m);
-    char* x = (char*)m;
-    memset(m, 0x00, 4096);
+    // Create a new page directory (Like for user space or something)
+    vmem_context *s = vmem_copy_context(NULL);
 
-    strncat(x, "Hello Everyone!", 5);
-    strncat(x, " ", 15);
-    strcat(x, "World");
-    strcat(x, "!");
-    strcat(x, "\n");
-    //memcpy(m, "Hello, World!\0", 15);
+    // Allocate some memory and a specific address
+    char* x = (char*)vmem_kalloc(
+        s, (virt_addr*)0x500000,
+        4096, x86_FLG_VMEM_WRITABLE );
 
-    if(m == NULL) kprintf("Didnt work\n");
-    else {
-        kprintf("Data stored in [%p]: %s", m, x);
-    }
-    */
+    kprintf("Allocated space under page table %i=>%p\n", s, x);
+
+    // Switch to the new paging table.
+    vmem_activate(s);
+
+    strncat(x, "Hello, world!", 13);
+    kprintf("VALUE: %s\n", x);
 
     for(;;);
 }

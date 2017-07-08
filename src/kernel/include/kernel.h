@@ -24,6 +24,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <vmem.h>
+#include <pmem.h>
 
 extern void* _start;
 extern void* _end;

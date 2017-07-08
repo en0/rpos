@@ -29,7 +29,7 @@
 #include <x86_vmem.h>
 
 /* Types */
-#define vmem_context            x86_vmem_context;
+#define vmem_context            x86_vmem_context
 #define phys_addr               x86_phys_addr
 #define virt_addr               x86_virt_addr
 

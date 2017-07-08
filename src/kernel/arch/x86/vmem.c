@@ -13,9 +13,7 @@
  ** but WITHOUT ANY WARRANTY; without even the implied warranty of
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU General Public License for more details.
- ** 
- ** You should have received a copy of the GNU General Public License
- ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ** ** You should have received a copy of the GNU General Public License ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
 #include <x86_vmem.h>
@@ -58,7 +56,7 @@
  **
  ** Add a few os specific flags for things like flagging a page that should
  ** be deleted when a pdt is destroyed.
- ** - x86_VMEM_COPY - when we do the copy we can mask this bit out.
+ ** - x86_VMEM_COPY - when we do the copy we can or this bit on.
  **
  ** NOTE: If additional kernel memory is needed, it can be allocated but any
  ** directories created before this allocation will not have them mapped in
@@ -103,7 +101,7 @@ x86_vmem_context* root_context;
  * PRIVATE METHOD PROTOTYPES
  */
 
-void _x86_map_page(x86_vmem_context*, x86_virt_addr, x86_phys_addr, uint32_t);
+void _x86_map_page(x86_vmem_context*, x86_virt_addr, uint32_t,  x86_phys_addr);
 void _x86_vmem_enable_paging();
 
 
@@ -127,7 +125,11 @@ x86_vmem_context* x86_vmem_init(x86_virt_addr* vaddr, size_t len, x86_phys_addr*
     memset(ctx, 0x00, x86_PMEM_PAGE_SIZE);
 
     // Map the page directory to itself (since it's the root context)
-    _x86_map_page(ctx, (x86_virt_addr)ctx, x86_FLG_SUPER_RW, (x86_phys_addr)ctx);
+    _x86_map_page(
+        ctx,
+        (x86_virt_addr)ctx,
+        x86_FLG_SUPER_RW,
+        (x86_phys_addr)ctx );
 
     // Map the kernel memory space.
     x86_vmem_map_region(ctx, vaddr, len, x86_FLG_SUPER_RW, paddr);
@@ -149,10 +151,30 @@ x86_vmem_context* x86_vmem_copy_context(x86_vmem_context* ctx) {
      * space for the new context.
      */
 
+    int i;
+    char *s, *d;
+
     if(ctx == NULL)
         return x86_vmem_copy_context(root_context);
 
-    return (x86_vmem_context*)NULL;
+    // allocate space
+    x86_vmem_context* new_ctx = x86_pmem_alloc();
+
+    // add the page to the root context.
+    _x86_map_page(
+        root_context,
+        (x86_virt_addr)new_ctx,
+        x86_FLG_SUPER_RW,
+        (x86_phys_addr)new_ctx );
+
+    // Copy the given context - Note we are reimplementing memcpy. We have a
+    // need to set the copy flag on each page directory entry.
+    for(s = (char*)ctx,
+        d = (char*)new_ctx,
+        i = x86_PMEM_PAGE_SIZE;
+        i > 0; *d++ = (x86_FLG_VMEM_COPY | *s++), i--);
+
+    return (x86_vmem_context*)new_ctx;
 }
 
 void x86_vmem_destroy_context(x86_vmem_context* ctx) {
@@ -167,6 +189,7 @@ void x86_vmem_destroy_context(x86_vmem_context* ctx) {
         // We cannot destroy the root context.
         return;
 
+    // TODO: Implement context destroy
 }
 
 x86_virt_addr* x86_vmem_kalloc(x86_vmem_context* ctx, x86_virt_addr* vaddr, size_t len, uint32_t flags) {
@@ -180,7 +203,17 @@ x86_virt_addr* x86_vmem_kalloc(x86_vmem_context* ctx, x86_virt_addr* vaddr, size
     if(ctx == NULL)
         return x86_vmem_kalloc(root_context, vaddr, len, flags);
 
-    return (x86_virt_addr*)NULL;
+    x86_virt_addr vbase;
+
+    // TODO: Implement first fit.
+
+    for(vbase = (x86_virt_addr)vaddr & 0xFFFFF000;
+        vbase < (uint32_t)vaddr + len;
+        vbase += x86_PMEM_PAGE_SIZE) {
+        _x86_map_page(ctx, vbase, flags, (x86_phys_addr)x86_pmem_alloc());
+    }
+
+    return (x86_virt_addr*)vaddr;
 }
 
 void x86_vmem_kfree(x86_vmem_context* ctx, x86_virt_addr* vaddr, size_t len) {
@@ -194,6 +227,7 @@ void x86_vmem_kfree(x86_vmem_context* ctx, x86_virt_addr* vaddr, size_t len) {
     if(ctx == NULL)
         return x86_vmem_kfree(root_context, vaddr, len);
 
+    // TODO: Implement kfree
 }
 
 void x86_vmem_map_region(x86_vmem_context* ctx, x86_virt_addr* vaddr, size_t len, uint32_t flags, x86_phys_addr* paddr) {
@@ -213,7 +247,7 @@ void x86_vmem_map_region(x86_vmem_context* ctx, x86_virt_addr* vaddr, size_t len
     for(vbase = (x86_virt_addr)vaddr & 0xFFFFF000, 
         pbase = (x86_virt_addr)paddr & 0xFFFFF000;
         vbase < (uint32_t)vaddr + len;
-        _x86_map_page(ctx, vbase, pbase, flags),
+        _x86_map_page(ctx, vbase, flags, pbase),
         vbase += x86_PMEM_PAGE_SIZE,
         pbase += x86_PMEM_PAGE_SIZE); 
 }
@@ -242,7 +276,7 @@ void x86_vmem_activate(x86_vmem_context* ctx) {
 void _x86_map_page(x86_vmem_context* ctx, x86_virt_addr vaddr, uint32_t flags, x86_phys_addr paddr) {
 
     /*
-     * _x86_map_page(ctx,vaddr,paddr,flags) will indiscriminately map the given
+     * _x86_map_page(ctx,vaddr,flags,paddr) will indiscriminately map the given
      * physical page to the given virtual address with the given flags. If a
      * new page is allocated, it will be automaticly added to the root context
      */
@@ -260,19 +294,37 @@ void _x86_map_page(x86_vmem_context* ctx, x86_virt_addr vaddr, uint32_t flags, x
 
     } else {
 
-        // Get a new page and set it to zero.
+        // Get a new page
         pdt_ref = (x86_phys_addr*)x86_pmem_alloc();
-        memset((void*)pdt_ref, 0x00, x86_PMEM_PAGE_SIZE);
 
         // Add the new pdt_ref to the working context.
         ctx[idx_pt] = ((uint32_t)pdt_ref & PAGE_FRAME_MASK) | flags | x86_FLG_VMEM_PRESENT;
 
+        // TODO: this is a really nasty.
+
         // Add this physcial address into the root context's map.
-        _x86_map_page(root_context, (x86_virt_addr)pdt_ref, x86_FLG_SUPER_RW, (x86_phys_addr)pdt_ref);
+        _x86_map_page(
+            root_context,
+            (x86_virt_addr)pdt_ref,
+            x86_FLG_SUPER_RW,
+            (x86_phys_addr)pdt_ref);
+
+        // Clear it out (Cannot write till it is mapped
+        memset((void*)pdt_ref, 0x00, x86_PMEM_PAGE_SIZE);
+
+        // Remap it because we just clobbered the new page index.
+        _x86_map_page(
+            root_context,
+            (x86_virt_addr)pdt_ref,
+            x86_FLG_SUPER_RW,
+            (x86_phys_addr)pdt_ref);
     }
 
     // Set the page pdt_ref target to the given physical address.
     pdt_ref[idx_pg] = (paddr & PAGE_FRAME_MASK) | flags | x86_FLG_VMEM_PRESENT;
+
+    // I dont know if i need this.
+    //asm volatile("invlpg (%0)" ::"r" ((uint32_t)vaddr): "memory");
 }
 
 void _x86_vmem_enable_paging() {
