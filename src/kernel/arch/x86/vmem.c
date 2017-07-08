@@ -18,9 +18,16 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
+#include <x86_vmem.h>
+#include <x86_pmem.h>
+#include <string.h>
+#include <kprint.h>
+
 /**
  ** Virtual Memory Manager
- ** We are still figuring out how this works but here is the plan
+ ** These functions manage page directory structures for use with kernal and
+ ** application context. With these functions, you can create new page
+ ** directories bassed on the kernel context and activate it.
  **
  ** vmem_init(vbase, pbase, length) should initialize the kernel space page 
  ** directory and map the given region: This is to map kernel memory. This
@@ -47,6 +54,8 @@
  ** map a virtual address to a physical address through pdt*. This is for
  ** static memory locations like video memory or the bios.
  **
+ ** vmem_activate(pdt*) will install the given page directory.
+ **
  ** Add a few os specific flags for things like flagging a page that should
  ** be deleted when a pdt is destroyed.
  ** - x86_VMEM_COPY - when we do the copy we can mask this bit out.
@@ -60,12 +69,49 @@
  ** worked and how to set it up.
  **/
 
-#include <x86_vmem.h>
-#include <x86_pmem.h>
-#include <string.h>
-#include <kprint.h>
+/*
+ * Constants
+ */
 
-x86_vmem_context* x86_vmem_init(x86_virt_addr* vaddr, x86_phys_addr* paddr, size_t len) {
+#define PAGE_FRAME_MASK      0b11111111111111111111000000000000
+#define PAGE_ATTRS_MASK      0b00000000000000000000111111111111
+#define TABLE_INDEX_MASK     0b00000000001111111111000000000000
+#define TABLE_DIRECTORY_MASK 0b11111111110000000000000000000000
+#define x86_FLG_SUPER_RW     (x86_FLG_VMEM_WRITABLE | x86_FLG_VMEM_SUPERVISOR)
+
+
+/*
+ * Macros
+ */
+
+#define GET_PAGE_TABLE_INDEX(a) ((a & TABLE_DIRECTORY_MASK)>>22)
+#define GET_PAGE_INDEX(a) ((a & TABLE_INDEX_MASK)>>12)
+#define GET_FLAG(entry, attr) (entry & attr)
+#define SET_FLAG(entry, attr) (entry |= attr)
+#define DEL_FLAG(entry, attr) (entry &= ~(attr))
+#define IS_FLAG(entry, attr) (GET_FLAG(entry, attr) == attr)
+
+
+/*
+ * Global Variables
+ */
+
+x86_vmem_context* root_context;
+
+
+/*
+ * PRIVATE METHOD PROTOTYPES
+ */
+
+void _x86_map_page(x86_vmem_context*, x86_virt_addr, x86_phys_addr, uint32_t);
+void _x86_vmem_enable_paging();
+
+
+/*
+ * PUBLIC METHODS
+ */
+
+x86_vmem_context* x86_vmem_init(x86_virt_addr* vaddr, size_t len, x86_phys_addr* paddr) {
 
     /*
      * vmem_init(vbase, pbase, length) should initialize the kernel space page 
@@ -74,21 +120,22 @@ x86_vmem_context* x86_vmem_init(x86_virt_addr* vaddr, x86_phys_addr* paddr, size
      * the newly created pdt*.
      */
 
-    x86_vmem_context* ctx = x86_pmem_alloc();
-    x86_virt_addr vbase, pbase;
-    uint32_t flags = x86_FLG_VMEM_PRESENT | x86_FLG_VMEM_WRITABLE | x86_FLG_VMEM_SUPERVISOR;
+    // Allocate a new directory, empty it, and map it within it's own address
+    // space so that we can access it after paging is enabled.
+    x86_vmem_context* ctx = root_context = x86_pmem_alloc();
+    memset(ctx, 0x00, x86_PMEM_PAGE_SIZE);
+    _x86_map_page(ctx, (x86_virt_addr)ctx, x86_FLG_SUPER_RW, (x86_phys_addr)ctx);
 
-    memset((void*)ctx, 0x00, x86_PMEM_PAGE_SIZE);
+    // Map the kernel memory space.
+    x86_vmem_map_region(ctx, vaddr, len, x86_FLG_SUPER_RW, paddr);
 
-    // Loop over the pages in the given address range and map each.
-    for(vbase = (x86_virt_addr)vaddr & 0xFFFFF000, 
-        pbase = (x86_virt_addr)paddr & 0xFFFFF000;
-        vbase < (uint32_t)vaddr + len;
-        _x86_map_page(ctx, vbase, pbase, flags),
-        vbase += x86_PMEM_PAGE_SIZE,
-        pbase += x86_PMEM_PAGE_SIZE); 
+    // Install the page directory
+    x86_vmem_activate(ctx);
 
-    return (x86_vmem_context*)ctx;
+    // Enable paging
+    _x86_vmem_enable_paging();
+
+    return ctx;
 }
 
 x86_vmem_context* x86_vmem_copy_context(x86_vmem_context* ctx) {
@@ -98,6 +145,9 @@ x86_vmem_context* x86_vmem_copy_context(x86_vmem_context* ctx) {
      * directory pointer. This new pdt* can then be used to allocate additional
      * space for the new context.
      */
+
+    if(ctx == NULL)
+        return x86_vmem_copy_context(root_context);
 
     return (x86_vmem_context*)NULL;
 }
@@ -110,6 +160,10 @@ void x86_vmem_destroy_context(x86_vmem_context* ctx) {
      * removed.
      */
 
+    if(ctx == NULL)
+        // We cannot destroy the root context.
+        return;
+
 }
 
 x86_virt_addr* x86_vmem_kalloc(x86_vmem_context* ctx, x86_virt_addr* vaddr, size_t len, uint32_t flags) {
@@ -119,6 +173,9 @@ x86_virt_addr* x86_vmem_kalloc(x86_vmem_context* ctx, x86_virt_addr* vaddr, size
      * region of memory at `virt_addr` through pdt* directory. If virt_addr is
      * NULL, vmem will find the first fit.
      */
+
+    if(ctx == NULL)
+        return x86_vmem_kalloc(root_context, vaddr, len, flags);
 
     return (x86_virt_addr*)NULL;
 }
@@ -131,9 +188,12 @@ void x86_vmem_kfree(x86_vmem_context* ctx, x86_virt_addr* vaddr, size_t len) {
      * will also be freed with pmem_free
      */
 
+    if(ctx == NULL)
+        return x86_vmem_kfree(root_context, vaddr, len);
+
 }
 
-void x86_vmem_map_region(x86_vmem_context* ctx, x86_virt_addr* vaddr, x86_phys_addr* paddr, size_t len) {
+void x86_vmem_map_region(x86_vmem_context* ctx, x86_virt_addr* vaddr, size_t len, uint32_t flags, x86_phys_addr* paddr) {
 
     /*
      * vmem_map_region(pdt*, virt_addr, phys_addr, length) will indiscriminately
@@ -141,147 +201,90 @@ void x86_vmem_map_region(x86_vmem_context* ctx, x86_virt_addr* vaddr, x86_phys_a
      * static memory locations like video memory or the bios.
      */
 
-}
-
-/** PRIVATE METHODS **********************************************************/
-
-void _x86_map_page(x86_vmem_context* ctx, x86_virt_addr vaddr, x86_phys_addr paddr, uint32_t flags) {
-
-    /*
-     * _x86_map_page(ctx,vaddr,paddr,flags) will indiscriminately map the given
-     * physical page to the given virtual address with the given flags.
-     */
-
-}
-
-/*
-void _x86_map_page(x86_virt_addr, x86_phys_addr, uint32_t);
-x86_phys_addr* _x86_allocate_page_table(uint32_t, uint32_t);
-x86_phys_addr* _x86_get_phys_addr(uint32_t*, uint32_t);
-x86_virt_addr _x86_find_first(uint32_t);
-
-#define PAGE_FRAME_MASK      0b11111111111111111111000000000000
-#define PAGE_ATTRS_MASK      0b00000000000000000000111111111111
-#define TABLE_INDEX_MASK     0b00000000001111111111000000000000
-#define TABLE_DIRECTORY_MASK 0b11111111110000000000000000000000
-
-#define GET_DIRECTORY_INDEX(a) ((a & TABLE_DIRECTORY_MASK)>>22)
-#define GET_TABLE_INDEX(a) ((a & TABLE_INDEX_MASK)>>12)
-
-#define GET_FLAG(entry, attr) (entry & attr)
-#define SET_FLAG(entry, attr) (entry |= attr)
-#define DEL_FLAG(entry, attr) (entry &= ~(attr))
-#define IS_FLAG(entry, attr) (GET_FLAG(entry, attr) == attr)
-
-#define PDT_SIZE (sizeof(pdt_entry_t) * 1024)
-
-uint32_t* _pdt;
-
-void* old_vmem_init() {
-
-    // Allocate physical memory to hold the page directory table.
-    _pdt = x86_pmem_alloc();
-
-    // write zeros to memory so that all pages are NOT present.
-    memset(_pdt, 0x00, PDT_SIZE);
-
-    // Map virtual to physcal address for the PDT location.
-    x86_vmem_map_region((x86_virt_addr)_pdt, PDT_SIZE, 0, (x86_phys_addr*)_pdt);
-
-    return (void*)_pdt;
-}
-
-x86_virt_addr* x86_vmem_map_region(x86_virt_addr vaddr, size_t length, uint32_t flags, x86_phys_addr* paddr) {
+    if(ctx == NULL)
+        return x86_vmem_map_region(root_context, vaddr, len, flags, paddr);
 
     x86_virt_addr vbase;
     x86_phys_addr pbase;
 
-    // Loop over the pages in the given address range and map each.
-    for(vbase = vaddr & 0xFFFFF000, pbase = (x86_phys_addr)paddr & 0xFFFFF000;
-        vbase < vaddr + length;
-        _x86_map_page(vbase, pbase, flags), vbase+=PAGE_SIZE, pbase+=PAGE_SIZE);
-
-    return (x86_virt_addr*)(vaddr & 0xFFFFF000);
+    for(vbase = (x86_virt_addr)vaddr & 0xFFFFF000, 
+        pbase = (x86_virt_addr)paddr & 0xFFFFF000;
+        vbase < (uint32_t)vaddr + len;
+        _x86_map_page(ctx, vbase, pbase, flags),
+        vbase += x86_PMEM_PAGE_SIZE,
+        pbase += x86_PMEM_PAGE_SIZE); 
 }
 
-void* x86_vmem_alloc(size_t length, uint32_t flags) {
+void x86_vmem_activate(x86_vmem_context* ctx) {
 
-    uint32_t pageCount = length / PAGE_SIZE;
-    x86_virt_addr vbase, vaddr;
+   /* 
+    * will install the given page directory.
+    * cr3 = ctx;
+    */
 
-    // compute number of pages.
-    if((length % PAGE_SIZE) > 0)
-        pageCount++;
-
-    kprintf("ok, allocate %i pages.", pageCount);
-
-    // find the first fit.
-    vaddr = _x86_find_first(pageCount);
-
-    //for(vbase = vaddr; vbase < vaddr + length; vbase+=PAGE_SIZE)
-        //_x86_map_page(vbase, (x86_phys_addr)x86_pmem_alloc(), flags);
-
-    return (void*)vaddr;
-}
-
-void x86_vmem_enable() {
-
-    //cr3 = _pdt;
-    //cr0 |= 0x80000001;
+    if(ctx == NULL)
+        return x86_vmem_activate(root_context);
 
     asm("mov %0, %%cr3;"
-        "mov %%cr0, %%eax;"
-        "or %1, %%eax;"
-        "mov %%eax, %%cr0;"
         : // no output
-        : "r"((uint32_t)_pdt), "r"(0x80000001)
+        : "r"((uint32_t)ctx)
         : "%eax" );
-
 }
 
-x86_virt_addr _x86_find_first(uint32_t pageCount) {
-    // ???
-    return 1;
-}
 
-void _x86_map_page(x86_virt_addr vaddr, x86_phys_addr paddr, uint32_t flags) {
+/*
+ * PRIVATE METHODS
+ */
 
-    // TODO: Make this check the target so we do not reallocate a virt_addr
-    // that is already in use.
+void _x86_map_page(x86_vmem_context* ctx, x86_virt_addr vaddr, uint32_t flags, x86_phys_addr paddr) {
+
+    /*
+     * _x86_map_page(ctx,vaddr,paddr,flags) will indiscriminately map the given
+     * physical page to the given virtual address with the given flags. If a
+     * new page is allocated, it will be automaticly added to the root context
+     */
+
+    x86_phys_addr* table;
 
     // Get the indexes for the page tables from the virtual address.
-    uint32_t dIndex = GET_DIRECTORY_INDEX(vaddr);
-    uint32_t tIndex = GET_TABLE_INDEX(vaddr);
+    uint32_t idx_pt = GET_PAGE_TABLE_INDEX(vaddr);
+    uint32_t idx_pg = GET_PAGE_INDEX(vaddr);
 
-    // lookup (or allocate) the page table address.
-    x86_phys_addr* table = _x86_allocate_page_table(dIndex, flags);
+    if(IS_FLAG(ctx[idx_pt], x86_FLG_VMEM_PRESENT)) {
 
-    // TODO: Check if page is already used. if so, PANIC!
+        // Page is in memory. Get a handle to it.
+        table = (x86_phys_addr*)(ctx[idx_pt] & PAGE_FRAME_MASK);
+
+    } else {
+
+        // Get a new page and set it to zero.
+        table = (x86_phys_addr*)x86_pmem_alloc();
+        memset((void*)table, 0x00, x86_PMEM_PAGE_SIZE);
+
+        // Add the new table to the working context.
+        ctx[idx_pt] = ((uint32_t)table & PAGE_FRAME_MASK) | flags | x86_FLG_VMEM_PRESENT;
+
+        // Add this physcial address into the root context's map.
+        _x86_map_page(root_context, (x86_virt_addr)table, x86_FLG_SUPER_RW, (x86_phys_addr)table);
+    }
 
     // Set the page table target to the given physical address.
-    table[tIndex] = (paddr & PAGE_FRAME_MASK) | flags | x86_VMEM_PRESENT;
-
-    kprintf("Mapped page: %p => %p (T:%i,P:%i,F:%b)\n", vaddr, paddr, dIndex, tIndex,flags);
+    table[idx_pg] = (paddr & PAGE_FRAME_MASK) | flags | x86_FLG_VMEM_PRESENT;
 }
 
-x86_phys_addr* _x86_allocate_page_table(uint32_t index, uint32_t flags) {
+void _x86_vmem_enable_paging() {
 
-    // TODO: since pmem_alloc() locks a full 4k page, we should setup 4 page
-    // directory entries.  Currently the remaning 3072 bytes is completely lost
+    /*
+     * _x86_vmem_enable_paging() will set the 2 flags in CR0 to enable paging.
+     * cr0 |= 0x80000001;
+     */
 
-    if(IS_FLAG(_pdt[index], x86_VMEM_PRESENT))
-        return _x86_get_phys_addr(_pdt, index);
-
-    void* m = x86_pmem_alloc();
-    memset(m, 0x00, PDT_SIZE);
-
-    _pdt[index] = ((uint32_t)m & PAGE_FRAME_MASK) | flags | x86_VMEM_PRESENT;
-    return (x86_phys_addr*)m;
+    asm("mov %%cr0, %%eax;"
+        "or %0, %%eax;"
+        "mov %%eax, %%cr0;"
+        : // no output
+        : "r"(0x80000001)
+        : "%eax", "%ebx" );
 }
-
-x86_phys_addr* _x86_get_phys_addr(uint32_t* base, uint32_t index) {
-    return (x86_phys_addr*)(base[index] & PAGE_FRAME_MASK);
-}
-*/
 
 /** Macros to interact with the memory map. **/

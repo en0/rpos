@@ -129,16 +129,10 @@ void init_memory_manager(multiboot_info_t* mbi) {
     pmem_lock_region(0x00, 4096);
 
     // Initialize paging data structures.
-    //vmem_init();
+    vmem_init((x86_virt_addr*)_START, (STACK_END - _START), (x86_phys_addr*)_START);
 
-    // Map kernel memory, the memory map, and the stack region.
-    //vmem_map_region((virt_addr)_START, (STACK_END - _START), VMEM_WRITABLE, (phys_addr*)_START);
-
-    // Map video memory so we can still print to the screen.
-    //vmem_map_region((virt_addr)0xB8000, 4096, VMEM_WRITABLE, (phys_addr*)0xB8000);
-
-    // Enable paging.
-    //vmem_enable();
+    // Map all 32kb of video memory so we can still print to the screen.
+    vmem_map_region(NULL, (virt_addr*)0xB8000, (32*1024), VMEM_FLG_SUPERVISOR | VMEM_FLG_WRITABLE, (phys_addr*)0xB8000);
 }
 
 void system_init(multiboot_info_t* mbi) {

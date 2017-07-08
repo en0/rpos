@@ -52,6 +52,7 @@
 #define vmem_kalloc             x86_vmem_kalloc
 #define vmem_kfree              x86_vmem_kfree
 #define vmem_map_region         x86_vmem_map_region
+#define vmem_activate           x86_vmem_activate
 
 #endif /** ARCH_x86 **/
 

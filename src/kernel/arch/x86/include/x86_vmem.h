@@ -43,12 +43,13 @@ typedef uint32_t x86_virt_addr;
 typedef uint32_t x86_phys_addr;
 
 /* Methods */
-x86_vmem_context* x86_vmem_init(x86_virt_addr*, x86_phys_addr*, size_t);
+x86_vmem_context* x86_vmem_init(x86_virt_addr*, size_t, x86_phys_addr*);
 x86_vmem_context* x86_vmem_copy_context(x86_vmem_context*);
 void x86_vmem_destroy_context(x86_vmem_context*);
 x86_virt_addr* x86_vmem_kalloc(x86_vmem_context*, x86_virt_addr*, size_t, uint32_t);
 void x86_vmem_kfree(x86_vmem_context*, x86_virt_addr*, size_t);
-void x86_vmem_map_region(x86_vmem_context*, x86_virt_addr*, x86_phys_addr*, size_t);
+void x86_vmem_map_region(x86_vmem_context*, x86_virt_addr*, size_t, uint32_t, x86_phys_addr*);
+void x86_vmem_activate(x86_vmem_context*);
 
 #endif /* __X86_VMEM_H */
 
