@@ -221,8 +221,8 @@ void x86_vmem_map_region(x86_vmem_context* ctx, x86_virt_addr* vaddr, size_t len
 void x86_vmem_activate(x86_vmem_context* ctx) {
 
    /* 
-    * will install the given page directory.
-    * cr3 = ctx;
+    * x86_vmem_activate(ctx) will install the given page directory.
+    * Logic: cr3 = ctx;
     */
 
     if(ctx == NULL)
@@ -247,7 +247,7 @@ void _x86_map_page(x86_vmem_context* ctx, x86_virt_addr vaddr, uint32_t flags, x
      * new page is allocated, it will be automaticly added to the root context
      */
 
-    x86_phys_addr* table;
+    x86_phys_addr* pdt_ref;
 
     // Get the indexes for the page tables from the virtual address.
     uint32_t idx_pt = GET_PAGE_TABLE_INDEX(vaddr);
@@ -256,30 +256,30 @@ void _x86_map_page(x86_vmem_context* ctx, x86_virt_addr vaddr, uint32_t flags, x
     if(IS_FLAG(ctx[idx_pt], x86_FLG_VMEM_PRESENT)) {
 
         // Page is in memory. Get a handle to it.
-        table = (x86_phys_addr*)(ctx[idx_pt] & PAGE_FRAME_MASK);
+        pdt_ref = (x86_phys_addr*)(ctx[idx_pt] & PAGE_FRAME_MASK);
 
     } else {
 
         // Get a new page and set it to zero.
-        table = (x86_phys_addr*)x86_pmem_alloc();
-        memset((void*)table, 0x00, x86_PMEM_PAGE_SIZE);
+        pdt_ref = (x86_phys_addr*)x86_pmem_alloc();
+        memset((void*)pdt_ref, 0x00, x86_PMEM_PAGE_SIZE);
 
-        // Add the new table to the working context.
-        ctx[idx_pt] = ((uint32_t)table & PAGE_FRAME_MASK) | flags | x86_FLG_VMEM_PRESENT;
+        // Add the new pdt_ref to the working context.
+        ctx[idx_pt] = ((uint32_t)pdt_ref & PAGE_FRAME_MASK) | flags | x86_FLG_VMEM_PRESENT;
 
         // Add this physcial address into the root context's map.
-        _x86_map_page(root_context, (x86_virt_addr)table, x86_FLG_SUPER_RW, (x86_phys_addr)table);
+        _x86_map_page(root_context, (x86_virt_addr)pdt_ref, x86_FLG_SUPER_RW, (x86_phys_addr)pdt_ref);
     }
 
-    // Set the page table target to the given physical address.
-    table[idx_pg] = (paddr & PAGE_FRAME_MASK) | flags | x86_FLG_VMEM_PRESENT;
+    // Set the page pdt_ref target to the given physical address.
+    pdt_ref[idx_pg] = (paddr & PAGE_FRAME_MASK) | flags | x86_FLG_VMEM_PRESENT;
 }
 
 void _x86_vmem_enable_paging() {
 
     /*
      * _x86_vmem_enable_paging() will set the 2 flags in CR0 to enable paging.
-     * cr0 |= 0x80000001;
+     * logic: cr0 |= 0x80000001;
      */
 
     asm("mov %%cr0, %%eax;"
