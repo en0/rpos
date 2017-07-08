@@ -120,10 +120,13 @@ x86_vmem_context* x86_vmem_init(x86_virt_addr* vaddr, size_t len, x86_phys_addr*
      * the newly created pdt*.
      */
 
-    // Allocate a new directory, empty it, and map it within it's own address
-    // space so that we can access it after paging is enabled.
+    // allocate space
     x86_vmem_context* ctx = root_context = x86_pmem_alloc();
+
+    // empty all the page directory entries
     memset(ctx, 0x00, x86_PMEM_PAGE_SIZE);
+
+    // Map the page directory to itself (since it's the root context)
     _x86_map_page(ctx, (x86_virt_addr)ctx, x86_FLG_SUPER_RW, (x86_phys_addr)ctx);
 
     // Map the kernel memory space.
