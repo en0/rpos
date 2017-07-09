@@ -37,18 +37,25 @@ void main(multiboot_info_t* bootinfo) {
     // Create a new page directory (Like for user space or something)
     vmem_context *s = vmem_copy_context(NULL);
 
-    // Allocate some memory and a specific address
-    char* x = (char*)vmem_kalloc(
-        s, (virt_addr*)0x500000,
-        4096, x86_FLG_VMEM_WRITABLE );
+    char *val = (char*)0x500000;
 
-    kprintf("Allocated space under page table %i=>%p\n", s, x);
+    // allocate space in the kernel page table.
+    vmem_kalloc( NULL, (virt_addr*)val, 4096, x86_FLG_VMEM_WRITABLE ); 
+    // allocate space in the new page table.
+
+    vmem_kalloc( s, (virt_addr*)val, 4096, x86_FLG_VMEM_WRITABLE ); 
 
     // Switch to the new paging table.
     vmem_activate(s);
 
-    strncat(x, "Hello, world!", 13);
-    kprintf("VALUE: %s\n", x);
+    strncat(val, "Hello, user! ", 13);
+    kprintf("VALUE: %s\n", val);
+    
+    // Switch to the kernel page table.
+    vmem_activate(NULL);
+
+    strncat(val, "Hello, Kernel", 13);
+    kprintf("VALUE: %s\n", val);
 
     for(;;);
 }
