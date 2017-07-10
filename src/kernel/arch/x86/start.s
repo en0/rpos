@@ -85,7 +85,7 @@ _start: ## Setup The temp stack
 
 kabort: push %ebp
         mov %esp, %ebp
-        call x86_kclear
+        ## call x86_kclear - That is silly - i cannot see debuging logs
         mov 0x8(%ebp), %eax
         push %eax
         call x86_kprintf

@@ -36,12 +36,17 @@ void main(multiboot_info_t* bootinfo) {
 
     char *val = (char*)0x500000;
 
+
     // Allocate a new page directory and a new page.
     vmem_context *s = vmem_copy_context(NULL);
-    vmem_kalloc( s, (virt_addr*)0x500000, 4096, x86_FLG_VMEM_WRITABLE ); 
+    if(vmem_kalloc( s, (virt_addr*)0x500000, 4096, x86_FLG_VMEM_WRITABLE ) == NULL)
+        kabort("Failed to allocate memory\n");
 
-    // Allocate some kernel space and set some data.
-    vmem_kalloc(NULL, (virt_addr*)0x500000, 4096, x86_FLG_VMEM_WRITABLE ); 
+    // Allocate some kernel space
+    if(vmem_kalloc(NULL, (virt_addr*)0x500000, 4096, x86_FLG_VMEM_WRITABLE ) == NULL)
+        kabort("Failed to allocate memory\n");
+
+    // Set the kernel value
     strncat(val, "Hello, Kernel", 13);
 
     // Activate the new pdt and add some data.

@@ -12,7 +12,7 @@
  ** This program is distributed in the hope that it will be useful,
  ** but WITHOUT ANY WARRANTY; without even the implied warranty of
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- ** GNU General Public License for more details.
+n ** GNU General Public License for more details.
  ** ** You should have received a copy of the GNU General Public License ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
@@ -101,7 +101,7 @@ x86_vmem_context* root_context;
  * PRIVATE METHOD PROTOTYPES
  */
 
-void _x86_map_page(x86_vmem_context*, x86_virt_addr, uint32_t,  x86_phys_addr);
+int _x86_map_page(x86_vmem_context*, x86_virt_addr, uint32_t,  x86_phys_addr);
 void _x86_vmem_enable_paging();
 
 
@@ -210,7 +210,19 @@ x86_virt_addr* x86_vmem_kalloc(x86_vmem_context* ctx, x86_virt_addr* vaddr, size
     for(vbase = (x86_virt_addr)vaddr & 0xFFFFF000;
         vbase < (uint32_t)vaddr + len;
         vbase += x86_PMEM_PAGE_SIZE) {
-        _x86_map_page(ctx, vbase, flags, (x86_phys_addr)x86_pmem_alloc());
+
+        if(_x86_map_page(ctx, vbase, flags, (x86_phys_addr)x86_pmem_alloc()) < 0) {
+
+            /* 
+             * The map page method returned an error and didnt alloc the space.
+             * Abort and un allocate anything that has already been allocated.
+             */ 
+
+            // TODO: This might become unneeded once firstFit is implemented
+
+            x86_vmem_kfree(ctx, vaddr, vbase - (uint32_t)vaddr);
+            return NULL;
+        }
     }
 
     return (x86_virt_addr*)vaddr;
@@ -262,9 +274,10 @@ void x86_vmem_activate(x86_vmem_context* ctx) {
     if(ctx == NULL)
         return x86_vmem_activate(root_context);
 
-    asm("mov %0, %%cr3;"
-        : // no output
-        : "r"((uint32_t)ctx));
+    asm volatile("mov %0, %%cr3;"
+        : /* no output */
+        : "r"(ctx)
+        : /* no clobber */ );
 }
 
 
@@ -272,7 +285,7 @@ void x86_vmem_activate(x86_vmem_context* ctx) {
  * PRIVATE METHODS
  */
 
-void _x86_map_page(x86_vmem_context* ctx, x86_virt_addr vaddr, uint32_t flags, x86_phys_addr paddr) {
+int _x86_map_page(x86_vmem_context* ctx, x86_virt_addr vaddr, uint32_t flags, x86_phys_addr paddr) {
 
     /*
      * _x86_map_page(ctx,vaddr,flags,paddr) will indiscriminately map the given
@@ -319,13 +332,20 @@ void _x86_map_page(x86_vmem_context* ctx, x86_virt_addr vaddr, uint32_t flags, x
             (x86_phys_addr)pdt_ref);
     }
 
-    // Set the page pdt_ref target to the given physical address.
-    pdt_ref[idx_pg] = (paddr & PAGE_FRAME_MASK) | flags | x86_FLG_VMEM_PRESENT;
+    if(!IS_FLAG(pdt_ref[idx_pg], x86_FLG_VMEM_PRESENT)) {
+        // Set the page pdt_ref target to the given physical address.
+        pdt_ref[idx_pg] = (paddr & PAGE_FRAME_MASK) | flags | x86_FLG_VMEM_PRESENT;
 
-    // I dont know if i need this.
-    asm ("invlpg (%0);" 
-        : // no output
-        : "r"(vaddr));
+        // I dont know if i need this.
+        asm volatile("invlpg %0;"
+            : // no output
+            : "m"(vaddr)
+            : "memory");
+
+        return 0;
+    }
+
+    return -1;
 }
 
 void _x86_vmem_enable_paging() {
@@ -335,12 +355,12 @@ void _x86_vmem_enable_paging() {
      * logic: cr0 |= 0x80000001;
      */
 
-    asm("mov %%cr0, %%eax;"
+    asm volatile("mov %%cr0, %%eax;"
         "or %0, %%eax;"
         "mov %%eax, %%cr0;"
         : // no output
-        : "r"(0x80000001)
-        : "%eax", "%ebx" );
+        : "n"(0x80000001)
+        : "eax" );
 }
 
 /** Macros to interact with the memory map. **/

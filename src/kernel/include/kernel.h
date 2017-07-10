@@ -32,5 +32,13 @@ extern void* _end;
 #define _START ((void*)&_start)
 #define _END ((void*)&_end)
 
+/**
+ ** kabort is defined in startup.s. It will
+ ** print the provided error message and halt the 
+ ** system.
+ **/
+
+extern void kabort(const char*);
+
 #endif /* __KERNEL_H */
 
