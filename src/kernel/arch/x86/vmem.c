@@ -304,6 +304,10 @@ int _x86_map_page(x86_vmem_context* ctx, x86_virt_addr vaddr, uint32_t flags, x8
         // Page is in memory. Get a handle to it.
         pdt_ref = (x86_phys_addr*)(ctx[idx_pt] & PAGE_FRAME_MASK);
 
+    } else if(IS_FLAG(ctx[idx_pt], x86_FLG_VMEM_COPY)) {
+
+        return -2; // Virtual address space is owned by a diffrent context.
+
     } else {
 
         // Get a new page
@@ -345,7 +349,7 @@ int _x86_map_page(x86_vmem_context* ctx, x86_virt_addr vaddr, uint32_t flags, x8
         return 0;
     }
 
-    return -1;
+    return -1; // virtual address space is already allocated.
 }
 
 void _x86_vmem_enable_paging() {
