@@ -264,8 +264,7 @@ void x86_vmem_activate(x86_vmem_context* ctx) {
 
     asm("mov %0, %%cr3;"
         : // no output
-        : "r"((uint32_t)ctx)
-        : "%eax" );
+        : "r"((uint32_t)ctx));
 }
 
 
@@ -324,7 +323,9 @@ void _x86_map_page(x86_vmem_context* ctx, x86_virt_addr vaddr, uint32_t flags, x
     pdt_ref[idx_pg] = (paddr & PAGE_FRAME_MASK) | flags | x86_FLG_VMEM_PRESENT;
 
     // I dont know if i need this.
-    //asm volatile("invlpg (%0)" ::"r" ((uint32_t)vaddr): "memory");
+    asm ("invlpg (%0);" 
+        : // no output
+        : "r"(vaddr));
 }
 
 void _x86_vmem_enable_paging() {

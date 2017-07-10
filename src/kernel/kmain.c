@@ -36,13 +36,15 @@ void main(multiboot_info_t* bootinfo) {
 
     char *val = (char*)0x500000;
 
+    // Allocate a new page directory and a new page.
+    vmem_context *s = vmem_copy_context(NULL);
+    vmem_kalloc( s, (virt_addr*)0x500000, 4096, x86_FLG_VMEM_WRITABLE ); 
+
     // Allocate some kernel space and set some data.
-    vmem_kalloc( NULL, (virt_addr*)val, 4096, x86_FLG_VMEM_WRITABLE ); 
+    vmem_kalloc(NULL, (virt_addr*)0x500000, 4096, x86_FLG_VMEM_WRITABLE ); 
     strncat(val, "Hello, Kernel", 13);
 
-    // Allocate a new page and add some data.
-    vmem_context *s = vmem_copy_context(NULL);
-    vmem_kalloc( s, (virt_addr*)val, 4096, x86_FLG_VMEM_WRITABLE ); 
+    // Activate the new pdt and add some data.
     vmem_activate(s);
     strncat(val, "Hello, user! ", 13);
 
@@ -51,7 +53,7 @@ void main(multiboot_info_t* bootinfo) {
     kprintf("VALUE: %s\n", val);
 
     // Switch back to new page and show data at 0x500000
-    vmem_activate(NULL);
+    vmem_activate(s);
     kprintf("VALUE: %s\n", val);
 
     for(;;);
