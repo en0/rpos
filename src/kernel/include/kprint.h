@@ -1,5 +1,5 @@
 /**
- ** Copyright (c) 2014 "Ian Laird"
+ ** Copyright (c) 2017 "Ian Laird"
  ** Research Project Operating System (rpos) - https://github.com/en0/rpos
  ** 
  ** This file is part of rpos
@@ -19,6 +19,7 @@
  **/
 
 #include <config.h>
+#include <stdint.h>
 
 #ifdef PROFILE_DEBUG
 
@@ -48,6 +49,7 @@
  **   On success, the total number of characters written is returned.
  **   On error, -1 is returned. */
 
+int kprintf(const char *format, ...);
 
 /** Function: int kputchar(int character)
  ** Writes a character to the text mode video memory
@@ -60,6 +62,7 @@
  **   On Success, the value of the character being written is returned
  **   On Error, -1 is returned */
 
+int kputchar(int character);
 
 /** Function: int kputs(const char* str)
  ** Writes the C string pointed to by str to the text mode video memory and 
@@ -72,18 +75,18 @@
  **   On success, the total number of characters written is returned.
  **   On error, -1 is returned. */
 
-/** 
- ** Setup macros to the real functions from the arch specific implementation 
- **/
+int kputs(const char* str);
 
-#ifdef ARCH_x86
-#include <x86_kprint.h>
-#define kclear x86_kclear
-#define kprintf x86_kprintf
-#define kputchar x86_kputchar
-#define kputs x86_kputs
-#endif /** ARCH_x86 **/
+/** Function: int kclear()
+ ** Writes space to the screen that will cause all text to scrolle off.
+ ** 
+ ** Arguments:
+ **   None
+ ** 
+ ** Returns:
+ **   None */
 
+void kclear();
 
 #endif /* __KPRINTF */
 

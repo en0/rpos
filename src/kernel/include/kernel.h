@@ -1,5 +1,5 @@
 /**
- ** Copyright (c) 2014 "Ian Laird"
+ ** Copyright (c) 2017 "Ian Laird"
  ** Research Project Operating System (rpos) - https://github.com/en0/rpos
  ** 
  ** This file is part of rpos

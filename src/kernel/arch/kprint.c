@@ -1,5 +1,5 @@
 /**
- ** Copyright (c) 2014 "Ian Laird"
+ ** Copyright (c) 2017 "Ian Laird"
  ** Research Project Operating System (rpos) - https://github.com/en0/rpos
  ** 
  ** This file is part of rpos
@@ -22,7 +22,7 @@
 
 #ifdef PROFILE_DEBUG
 
-#include <x86_kprint.h>
+#include <kprint.h>
 #include <stdarg.h>
 #include "string.h"
 
@@ -37,9 +37,9 @@
 #define SCREEN_REAL_WIDTH (SCREEN_WIDTH * SCREEN_CHAR_WIDTH)
 
 typedef volatile uint16_t vidtext_t;
-typedef uint32_t x86_kfpos_t;
+typedef uint32_t kfpos_t;
 
-x86_kfpos_t _cursor = 0;
+kfpos_t _cursor = 0;
 vidtext_t* _video_memory = (vidtext_t*)VIDEO_MEMORY;
 
 extern char* itoa(int value, char* str, int base);
@@ -69,16 +69,16 @@ void _scroll() {
     }
 }
 
-void x86_kclear() {
+void kclear() {
 
     int i;
 
     for(i = 0; i < SCREEN_HEIGHT*2; i++)
-        x86_kputchar('\n');
+        kputchar('\n');
     _cursor = 0;
 }
 
-int x86_kprintf(const char *format, ...) {
+int kprintf(const char *format, ...) {
     const char *p;
     int _ret = 0;
 
@@ -92,27 +92,27 @@ int x86_kprintf(const char *format, ...) {
     for(p = format; *p != '\0'; p++) {
 
         if(*p != '%') {
-            x86_kputchar((int)*p);
+            kputchar((int)*p);
             _ret++;
             continue;
         }
 
         switch(*++p) {
             case '%' : /* Literal % */
-                x86_kputchar((int)'%');
+                kputchar((int)'%');
                 _ret++;
                 break;
 
             case 'c' : /* Charater */
                 va_char = va_arg(params, int);
-                x86_kputchar(va_char);
+                kputchar(va_char);
                 _ret++;
                 break;
 
             case 's' : /* C String */
                 va_str = (char*)va_arg(params, int);
                 for(;*va_str != '\0'; va_str++) {
-                    x86_kputchar((int)(*va_str));
+                    kputchar((int)(*va_str));
                     _ret++;
                 }
                 break;
@@ -121,38 +121,38 @@ int x86_kprintf(const char *format, ...) {
             case 'i' :
                 va_char = (int)va_arg(params, int);
                 itoa(va_char, buffer, 10);
-                x86_kprintf(buffer);
+                kprintf(buffer);
                 break;
 
             case 'u' : /* Unsigned Integer */
                 va_char = (int)va_arg(params, int);
                 uitoa(va_char, buffer, 10);
-                x86_kprintf(buffer);
+                kprintf(buffer);
                 break;
 
             case 'x' : /* Unsigned Hex (lower case only) */
             case 'X' : 
                 va_char = (int)va_arg(params, int);
                 uitoa(va_char, buffer, 16);
-                x86_kprintf(buffer);
+                kprintf(buffer);
                 break;
                 
             case 'o' : /* Unsigned Octal */
                 va_char = (int)va_arg(params, int);
                 uitoa(va_char, buffer, 8);
-                x86_kprintf(buffer);
+                kprintf(buffer);
                 break;
 
             case 'p' : /* Pointer */
                 va_char = (int)va_arg(params, int);
                 uitoa(va_char, buffer, 16);
-                x86_kprintf("0x%s", buffer);
+                kprintf("0x%s", buffer);
                 break;
             
             case 'b' : /* Binary */
                 va_char = (int)va_arg(params, int);
                 uitoa(va_char, buffer, 2);
-                x86_kprintf("%sb", buffer);
+                kprintf("%sb", buffer);
 
             case 'n' : /* nothing (Param must be an int) */
                 va_char = (int)va_arg(params, int);
@@ -165,7 +165,7 @@ int x86_kprintf(const char *format, ...) {
 }
 
 
-int x86_kputchar(int character) {
+int kputchar(int character) {
     int i;
 
     switch((char)(character & 0xFF)) {
@@ -182,9 +182,9 @@ int x86_kputchar(int character) {
             break;
 
         case '\t':
-            x86_kputchar(0x20);
+            kputchar(0x20);
             for(i = 0; i < (_cursor) % TAB_WIDTH; i++)
-                x86_kputchar(0x20);
+                kputchar(0x20);
             break;
 
         default:
@@ -196,11 +196,11 @@ int x86_kputchar(int character) {
 }
 
 
-int x86_kputs(const char* str) {
+int kputs(const char* str) {
     int i;
     for(i = 1; *str != '\0'; str++, i++)
-        x86_kputchar((int)*str);
-    x86_kputchar('\n');
+        kputchar((int)*str);
+    kputchar('\n');
     return i;
 }
 

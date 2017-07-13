@@ -1,4 +1,4 @@
-## Copyright (c) 2014 "Ian Laird"
+## Copyright (c) 2017 "Ian Laird"
 ## Research Project Operating System (rpos) - https://github.com/en0/rpos
 ## 
 ## This file is part of rpos
@@ -20,10 +20,10 @@ MAKE_CONFIG=../../config.mk
 
 include $(MAKE_CONFIG)
 
-ARCH_PATH := arch/$(ARCH)
+ARCH_PATH := arch
 LIB_PATH := lib
-LIB_PATH_ARCH := $(LIB_PATH)/arch/$(ARCH)
-KERNEL=$(ARCH)-elf-kernel
+LIB_PATH_ARCH := $(LIB_PATH)/arch
+KERNEL=x86-elf-kernel
 
 OBJS=$(patsubst %.c, %.c.o, $(wildcard *.c) $(wildcard $(ARCH_PATH)/*.c) $(wildcard $(LIB_PATH)/*.c) $(wildcard $(LIB_PATH_ARCH)/*.c)) \
      $(patsubst %.s, %.s.o, $(wildcard *.s) $(wildcard $(ARCH_PATH)/*.s) $(wildcard $(LIB_PATH)/*.s) $(wildcard $(LIB_PATH_ARCH)/*.s))
@@ -112,7 +112,7 @@ info :
 	@echo ""
 	@echo Build configuration information.
 	@echo ""
-	@echo Objects for arch \"$(ARCH) \($(PROFILE)\)\":
+	@echo Build Objects \"\($(PROFILE)\)\":
 	@echo $(OBJS) | xargs -n1 | sed s/^/\ -\ /
 	@echo ""
 	@echo Configuration Headers.

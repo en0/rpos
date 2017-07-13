@@ -1,5 +1,5 @@
 /**
- ** Copyright (c) 2014 "Ian Laird"
+ ** Copyright (c) 2017 "Ian Laird"
  ** Research Project Operating System (rpos) - https://github.com/en0/rpos
  ** 
  ** This file is part of rpos
@@ -19,7 +19,7 @@
  **/
 
 #include <multiboot.h>
-#include <pmem.h>
+// #include <pmem.h>
 
 /** 
  ** _start and _end are exposed via linker script 
@@ -55,10 +55,6 @@ extern void* _end;
 
 extern void kabort(const char*);
 
-void* find_stack(multiboot_info_t* mbi) {
-    return pmem_map_end(_END, (mbi->mem_upper + mbi->mem_lower)) + STACK_SIZE;
-}
-
 void validate_boot_env(multiboot_info_t* mbi) {
 
     /** 
@@ -84,25 +80,29 @@ void validate_boot_env(multiboot_info_t* mbi) {
     /** MBOOT Sanity Check **/
     if( CHECK_FLAG(mbi->flags, MULTIBOOT_INFO_AOUT_SYMS) && 
         CHECK_FLAG(mbi->flags, MULTIBOOT_INFO_ELF_SHDR)) {
-        kabort("ERROR: Multiboot data is not sane!\n");
+        asm volatile("hlt");
+        //kabort("ERROR: Multiboot data is not sane!\n");
     }
 
     /** Need memory info **/
     if( !CHECK_FLAG(mbi->flags, MULTIBOOT_INFO_MEM_MAP) ||
         !CHECK_FLAG(mbi->flags, MULTIBOOT_INFO_MEMORY)) {
-        kabort("ERROR: No memory information provided by boot loader!\n");
+        asm volatile("hlt");
+        //kabort("ERROR: No memory information provided by boot loader!\n");
     }
 
     /** Need a boot device **/
     if( !CHECK_FLAG(mbi->flags, MULTIBOOT_INFO_MODS) &&
       ( !CHECK_FLAG(mbi->flags, MULTIBOOT_INFO_BOOTDEV) ||
         !CHECK_FLAG(mbi->flags, MULTIBOOT_INFO_DRIVE_INFO))) {
-        kabort("ERROR: No boot device!\n");
+        asm volatile("hlt");
+        //kabort("ERROR: No boot device!\n");
     }
 }
 
 void init_pmem(multiboot_info_t* mbi) {
 
+    /*
     void* STACK_END = find_stack(mbi);
 
     pmem_init(_END, (mbi->mem_upper + mbi->mem_lower));
@@ -122,10 +122,11 @@ void init_pmem(multiboot_info_t* mbi) {
 
     // Lock the first page. it just messes up NULL checking
     pmem_lock_region(0x00, 4096);
+    */
 }
 
 void system_init(multiboot_info_t* mbi) {
     validate_boot_env(mbi);
-    init_pmem(mbi);
+    //init_pmem(mbi);
 }
 

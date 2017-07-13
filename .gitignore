@@ -1,4 +1,9 @@
 src/testing*
+scripts/toolchain/i686
+
+# Exclude anything with -ignore
+*-ignore
+
 # Object files
 *.o
 *.ko
@@ -30,3 +35,4 @@ __pycache__
 # IDE
 *.swp
 
+.gdb_history

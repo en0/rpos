@@ -21,9 +21,6 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H 1
 
-#define ARCH "@ARCH"
-#define ARCH_@ARCH 1
-
 #define STACK_SIZE @STACK_SIZE
 
 #define PROJNAME "@PROJNAME"

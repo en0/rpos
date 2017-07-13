@@ -1,5 +1,5 @@
 /**
- ** Copyright (c) 2014 "Ian Laird"
+ ** Copyright (c) 2017 "Ian Laird"
  ** Research Project Operating System (rpos) - https://github.com/en0/rpos
  ** 
  ** This file is part of rpos
@@ -18,22 +18,48 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#ifndef __X86_PMEM_H
-#define __X86_PMEM_H 1
+#include <string.h>
 
-#include <stdint.h>
-#include <stdbool.h>
+char* itoa(int value, char* str, int base) {
+    static char* num = "0123456789abcdef";
+    char* ret = str;
+    int sign = value;
 
-#define x86_pmem_page_count(kb) (kb>>7)
-#define x86_pmem_page_size(kb) ((kb>>7) * sizeof(uint32_t))
+    if (base<2 || base>16) {
+        *ret='\0';
+        return NULL;
+    }
 
-void* x86_pmem_alloc();
-void* x86_pmem_alloc_low();
-void x86_pmem_free(void* addr);
-void x86_pmem_lock_region(void* addr, uint32_t size);
-void x86_pmem_free_region(void* addr, uint32_t size);
-void* x86_pmem_map_end(void* map_start, uint32_t size);
-void x86_pmem_init(void* map_start, uint32_t size);
+    if(value < 0)
+        value = -value;
 
-#endif /* __X86_PMEM_H */
+    do {
+        *ret++ = num[value % base]; 
+    } while(value/=base);
+
+    if(sign < 0)
+        *ret++ = '-';
+
+    *ret++ = '\0';
+
+    return strrev(str);
+}
+
+char* uitoa(unsigned value, char* str, int base) {
+    static char* num = "0123456789abcdef";
+    char* ret = str;
+
+    if (base<2 || base>16) {
+        *ret='\0';
+        return NULL;
+    }
+
+    do {
+        *ret++ = num[value % base]; 
+    } while(value/=base);
+
+    *ret++ = '\0';
+
+    return strrev(str);
+}
 

@@ -22,7 +22,6 @@
 PROJNAME = RPOS
 PROFILE = DEBUG
 STACK_SIZE = (4096*4)
-ARCH=x86
 
 
 # Project root path

@@ -1,5 +1,5 @@
 /**
- ** Copyright (c) 2014 "Ian Laird"
+ ** Copyright (c) 2017 "Ian Laird"
  ** Research Project Operating System (rpos) - https://github.com/en0/rpos
  ** 
  ** This file is part of rpos
@@ -34,21 +34,6 @@ void main(multiboot_info_t* bootinfo) {
             &_start, &_end);
 
     kprintf("Attempting to allocate some memory...\n");
-    void* m = pmem_alloc();
-    char* x = (char*)m;
-    memset(m, 0x00, 4096);
-
-    strncat(x, "Hello Everyone!", 5);
-    strncat(x, " ", 15);
-    strcat(x, "World");
-    strcat(x, "!");
-    strcat(x, "\n");
-    //memcpy(m, "Hello, World!\0", 15);
-
-    if(m == NULL) kprintf("Didnt work\n");
-    else {
-        kprintf("Data stored in [%p]: %s", m, x);
-    }
 
     for(;;);
 }
