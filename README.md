@@ -1,3 +1,11 @@
+I think i am going to start over on some parts - I want to begin with a higher
+half kernel. Setup physical memory managment then setup paging using a
+recursive paging model. After that IRQs t hen ISRs then probably some elf
+handing.  if i can get to the point where i am loading a elf for execution,
+even in supervisor mode, i will be happy at this point.
+
+It's been like 3 years since i started this thing, time to make some progress.
+
 rpos
 ====
 
