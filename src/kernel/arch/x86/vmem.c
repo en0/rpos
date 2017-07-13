@@ -12,9 +12,40 @@
  ** This program is distributed in the hope that it will be useful,
  ** but WITHOUT ANY WARRANTY; without even the implied warranty of
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-n ** GNU General Public License for more details.
- ** ** You should have received a copy of the GNU General Public License ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ** GNU General Public License for more details.
+ ** 
+ ** You should have received a copy of the GNU General Public License 
+ ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
+
+/* 
+ * As i change my mind repeatidly - 
+ * I want to use a recursive map (i mean i already am, its just a giant cluster
+ * fk). So lets use the one that everyone knows:
+ *
+ * The page dir is a pointer to virtual address 0xFFFFF000
+ * All page tables can be accessed as a offset from 0xFFC00000
+ *
+ * uint32_t *page_dir = 0xFFFFF000;
+ * uint32_t *page_tbl = 0xFFC00000;
+ *
+ * So, to setup the new directory (before paging is enabled)
+ *
+ * uint32_t phys = pmem_alloc();
+ * memset(phys, 0x00, 0x1000);
+ * phys[1023] = phys | FLG_PRESENT | FLG_WRITABLE;
+ * // ... Map the kernel space ...
+ * set_active(phys);
+ * enable_paging()
+ *
+ * if we want to map existing space (like kernel memory)
+ * (virt, phys) => {
+ *   page_dir[virt>>22] = &page_tbl[virt>>12] | flags;
+ *   page_tbl[virt>>12] = phys | flags;
+ * }
+ *
+ * // map the page to the 
+ */
 
 #include <x86_vmem.h>
 #include <x86_pmem.h>
