@@ -24,14 +24,17 @@
 #include <string.h>
 
 void main(multiboot_info_t* bootinfo) {
-    /* bootinfo points to the multiboot header
+
+    /* 
+     * bootinfo points to the multiboot header
      * end_of_kernel points to the bottom of the stack
-     * We need to lock memory to end_of_kernel and set up a new stack */
+     * We need to lock memory to end_of_kernel and set up a new stack 
+     */
 
     kprintf("Research Porject Kernel\n"
             "Kernel starts at %p\n"
             "Kernel ends at %p\n",
-            &_start, &_end);
+            &_begin, &_end);
 
     kprintf("Attempting to allocate some memory...\n");
 

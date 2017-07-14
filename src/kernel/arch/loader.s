@@ -20,7 +20,7 @@
         # temporary page directory that maps all memory below 3G to itself
         # (identity) and the first 4MB of memory to 0xC0000000 using Physical
         # Size Extention. Paging and protected mode are enabled. Execution is
-        # given to [entry] at the 0xC0000000 range (defined in start.s).
+        # given to [_start] at the 0xC0000000 range (defined in start.s).
 
         # NOTE: The identity mapping is left in place. It is indended to make
         # it easier for the kernel to use the multiboot data and module
@@ -31,7 +31,7 @@
 
         .global ldr     # A 0x100000 refrence to _ldr so that grub can find it.
         .global LDRPDT  # Export the page table so the kernel can deal with it later
-        .extern entry   # The kernel entry point at the ~0xC0100000 address.
+        .extern _start   # The kernel entry point at the ~0xC0100000 address.
 
         .equ vBase, 0xC0000000          # 3G memory address
         .equ ldr, _ldr - vBase          # A 1M refrence to _ldr for boot loader
@@ -68,7 +68,7 @@ LDRPDT: .rept pgNumber          # Identity map all the page below 3G
         # In execution, load the LDRPDT into the page directory register (cr3)
         # and enable paging - Make sure that protected mode is on. just in
         # case. Also, we have to enable physical size extention in cr4. Then
-        # jump to the higher half equivelant of [entry]. Note that the identity
+        # jump to the higher half equivelant of [_start]. Note that the identity
         # map is left in place to make it easier for sysinit to use MBI
 
         .section .text
@@ -88,6 +88,6 @@ _ldr:   mov $(LDRPDT - vBase), %ecx
         or $0x80000001, %ecx 
         mov %ecx, %cr0
 
-        # jump (absolute) to entry, which is linked around 0xC0100000
-        lea entry, %ecx
+        # jump (absolute) to _start, which is linked around 0xC0100000
+        lea _start, %ecx
         jmp *%ecx
