@@ -16,32 +16,65 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-        .global ldr
-        .global LDRPDT
-        .extern entry
+        # loader.s is the first code executed in the kernel. It creates a
+        # temporary page directory that maps all memory below 3G to itself
+        # (identity) and the first 4MB of memory to 0xC0000000 using Physical
+        # Size Extention. Paging and protected mode are enabled. Execution is
+        # given to [entry] at the 0xC0000000 range (defined in start.s).
 
-        .equ vBase, 0xC0000000
-        .equ ldr, _ldr - vBase
-        .equ page_number, (vBase >> 22)
+        # NOTE: The identity mapping is left in place. It is indended to make
+        # it easier for the kernel to use the multiboot data and module
+        # refrences.
+
+        # NOTE: You can easly map more pages to the higher half by adjusting
+        # the vPageCount contant below.
+
+        .global ldr     # A 0x100000 refrence to _ldr so that grub can find it.
+        .global LDRPDT  # Export the page table so the kernel can deal with it later
+        .extern entry   # The kernel entry point at the ~0xC0100000 address.
+
+        .equ vBase, 0xC0000000          # 3G memory address
+        .equ ldr, _ldr - vBase          # A 1M refrence to _ldr for boot loader
+        .equ pgNumber, (vBase >> 22)    # The index of the 3G PDE
+        .equ vPageCount, 1              # The number of higher half pages to map
+
+        # Create a temp page table that maps the first 3G of memory to itself
+        # and the first 4M of memory to virtual address 0xC0000000 (3G). We are
+        # using large pages here The intent is that he kernel will replace this
+        # with a 4k page stuct.
+
 
         .section .data
         .align 0x1000
 
-LDRPDT: .4byte 0x83
-        .rept page_number - 1
-            .4byte 0x80
+        .set paddr, 0           # Start mapping at address zero
+
+LDRPDT: .rept pgNumber          # Identity map all the page below 3G
+            .4byte paddr | 0x83 # PRESENT | READ/WRITE | PAGE_SIZE 4MB
+            .set paddr, paddr + 0x400000
         .endr
 
-        .4byte 0x83
-        .rept 1024 - page_number - 1
-            .4byte 0x80
+        .set paddr, 0           # Reset PADDR: Start mapping at address zero
+
+        .rept vPageCount        # Map the higher half pages above 3G
+            .4byte paddr | 0x83 # PRESENT | READ/WRITE | PAGE_SIZE 4M
+            .set paddr, paddr + 0x400000
         .endr
+
+        .rept 1024 - pgNumber - vPageCount
+            .4byte 0x00         # empty
+        .endr
+
+        # In execution, load the LDRPDT into the page directory register (cr3)
+        # and enable paging - Make sure that protected mode is on. just in
+        # case. Also, we have to enable physical size extention in cr4. Then
+        # jump to the higher half equivelant of [entry]. Note that the identity
+        # map is left in place to make it easier for sysinit to use MBI
 
         .section .text
         .align 4
 
-        .equ STACKSIZE, 0x4000
-
+        # Load page directory
 _ldr:   mov $(LDRPDT - vBase), %ecx
         mov %ecx, %cr3
 
@@ -55,6 +88,6 @@ _ldr:   mov $(LDRPDT - vBase), %ecx
         or $0x80000001, %ecx 
         mov %ecx, %cr0
 
+        # jump (absolute) to entry, which is linked around 0xC0100000
         lea entry, %ecx
         jmp *%ecx
-        hlt
