@@ -17,6 +17,8 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
         .global _start
+        .extern initIDT
+        .extern initGDT
         .extern kprintf
         .extern kclear
 
@@ -45,6 +47,10 @@ _start: movl $stack, %esp       ## Setup temp stack
         call kabort             ## Abort with message
 
 .start: mov %ebx, (mbi)         ## Backup Multiboot Info
+
+        ## Install Descriptor Tables
+        call initGDT
+        call initIDT
 
         ## relocate stack
         push mbi
