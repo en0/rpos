@@ -37,6 +37,13 @@ void main(multiboot_info_t* bootinfo) {
             "Paging is enabled.\n",
             &_begin, &_end);
 
+    // Test out the call gates
+    asm ("int $0x80");
+
     for(;;);
+}
+
+void test() {
+    kprintf("Hello, world %p", 0x1000);
 }
 

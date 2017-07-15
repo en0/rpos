@@ -50,7 +50,7 @@ idt_end:
             .section .rodata
             .align 4
 
-msg: .asciz "\n[x] Hello, from IRQ %i\n"
+msg: .asciz "\n[x] Hello, from IRQ! %p\n"
 
 idt_info:   .2byte idt_end - idt_start - 1
             .4byte idt_start
@@ -73,7 +73,7 @@ initIDT:    push %ebp           # Backup the stack frame
             .endr
 
             lidt idt_info       # Install the new IDT
-            sti                 # Enable Interrupts! probably want to remap the PIC first
+            #sti                 # Enable Interrupts! probably want to remap the PIC first
 
 break:      pop %ebx            # Restore eax and ebx
             pop %eax            # so they have all the multi boot stuff
@@ -84,14 +84,17 @@ break:      pop %ebx            # Restore eax and ebx
         # Temp IRQ Hander that prints a message to the screen when it is
         # called. Just testing things out.
 
-irq0:       push %ebp
+irq0:       cli
+            push %ebp
             mov %esp, %ebp
+            sub $0x1c, %esp
 
-            push %eax
-            push $msg
+            movl $0xDEADBEEF, 0x4(%esp)
+            movl $msg, (%esp)
             call kprintf
 
             mov %ebp, %esp
             pop %ebp
 
+            sti
             iret
