@@ -172,10 +172,10 @@ RTC implementation
 - Reload Value: 0x04AA (CRl=0xAA, CRm=0x04)
 
 ```asm
-# Setup RTC on Counter 0 to produce IRQ 0 at 1 ms intervals.
-out $0x43, $0b00110100  # CS=0, ACS=3, MODE=2, BCD=false
-out $0x40, $0xAA        # LSB of CR
-out $0x40, $0x04        # MSB of CR
+; Setup RTC on Counter 0 to produce IRQ 0 at 1 ms intervals.
+out $0b00110100, $0x43  ; CS=0, ACS=3, MODE=2, BCD=false
+out $0xAA, $0x40        ; LSB of CR
+out $0x04, $0x40        ; MSB of CR
 ```
 
 ### Counter 1 
