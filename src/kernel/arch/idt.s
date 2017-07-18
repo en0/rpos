@@ -42,7 +42,7 @@
             .endm
 
             .section .bss
-            .align 4
+            #.align 4
 
 idt_start:  .skip 2048
 idt_end:
@@ -50,7 +50,8 @@ idt_end:
             .section .rodata
             .align 4
 
-msg: .asciz "\n[x] Hello, from IRQ! %p\n"
+msg_sr:     .asciz "\n[x] Hello, from IRQ! %p"
+msg_irq:    .asciz "."
 
 idt_info:   .2byte idt_end - idt_start - 1
             .4byte idt_start
@@ -66,14 +67,52 @@ initIDT:    push %ebp           # Backup the stack frame
             push %eax           # Save eax and ebx
             push %ebx           # so we don't clobber them
 
+            # install irq0 for the RTC
             .set idt_start_offset, 0x00
-            .rept 255
             install_idt_entry idt_start+idt_start_offset irq0
+            .set idt_start_offset, idt_start_offset+0x08
+            install_idt_entry idt_start+idt_start_offset irq0
+            .set idt_start_offset, idt_start_offset+0x08
+            install_idt_entry idt_start+idt_start_offset irq0
+            .set idt_start_offset, idt_start_offset+0x08
+            install_idt_entry idt_start+idt_start_offset irq0
+            .set idt_start_offset, idt_start_offset+0x08
+            install_idt_entry idt_start+idt_start_offset irq0
+            .set idt_start_offset, idt_start_offset+0x08
+            install_idt_entry idt_start+idt_start_offset irq0
+            .set idt_start_offset, idt_start_offset+0x08
+            install_idt_entry idt_start+idt_start_offset irq0
+            .set idt_start_offset, idt_start_offset+0x08
+            install_idt_entry idt_start+idt_start_offset irq0
+            .set idt_start_offset, idt_start_offset+0x08
+            install_idt_entry idt_start+idt_start_offset irq8
+
+            ## These are all broken because they only respond to pic0
+            .set idt_start_offset, idt_start_offset+0x08
+            install_idt_entry idt_start+idt_start_offset irq0
+            .set idt_start_offset, idt_start_offset+0x08
+            install_idt_entry idt_start+idt_start_offset irq0
+            .set idt_start_offset, idt_start_offset+0x08
+            install_idt_entry idt_start+idt_start_offset irq0
+            .set idt_start_offset, idt_start_offset+0x08
+            install_idt_entry idt_start+idt_start_offset irq0
+            .set idt_start_offset, idt_start_offset+0x08
+            install_idt_entry idt_start+idt_start_offset irq0
+            .set idt_start_offset, idt_start_offset+0x08
+            install_idt_entry idt_start+idt_start_offset irq0
+            .set idt_start_offset, idt_start_offset+0x08
+            install_idt_entry idt_start+idt_start_offset irq0
+            .set idt_start_offset, idt_start_offset+0x08
+            install_idt_entry idt_start+idt_start_offset irq0
+            .set idt_start_offset, idt_start_offset+0x08
+
+            # Mapping everything else to Service Request Zero for now
+            .rept 255-16
+            install_idt_entry idt_start+idt_start_offset sr0
             .set idt_start_offset, idt_start_offset+0x08
             .endr
 
             lidt idt_info       # Install the new IDT
-            #sti                 # Enable Interrupts! probably want to remap the PIC first
 
 break:      pop %ebx            # Restore eax and ebx
             pop %eax            # so they have all the multi boot stuff
@@ -84,18 +123,44 @@ break:      pop %ebx            # Restore eax and ebx
         # Temp IRQ Hander that prints a message to the screen when it is
         # called. Just testing things out.
 
-irq0:       cli
-            push %ebp
-            mov %esp, %ebp
-            sub $0x1c, %esp
+sr0:    pusha           # Backup all registers.
+        mov %esp, %ebp  # Backup the stack pointer
 
-            #movl $0xDEADBEEF, 0x4(%esp)
-            movl %eax, 0x4(%esp)
-            movl $msg, (%esp)
-            call kprintf
+        push %eax
+        push $msg_sr
+        call kprintf    # kprintf(msg_sr, %eax)
 
-            mov %ebp, %esp
-            pop %ebp
+        mov %ebp, %esp  # Restore stack pointer
+        popa            # Restore all registers.
+        iret            # Return from interrupt (resets eflags and what not.)
 
-            sti
-            iret
+irq0:   cli             # Disable interrupts to prevent timer issues.
+        pusha           # Backup all registers.
+        mov %esp, %ebp  # Backup the stack pointer
+
+        ## DO SOMETHING
+
+        mov %ebp, %esp  # Restore stack pointer
+        popa            # Restore all registers
+
+        mov $0x20, %al
+        out %al, $0x20  # send EOI to PIC0
+
+        sti             # Re-enable interrupts
+        iret            # Return from interrupt (resets eflags and what not.)
+
+irq8:   cli             # Disable interrupts to prevent timer issues.
+        pusha           # Backup all registers.
+        mov %esp, %ebp  # Backup the stack pointer
+
+        push $msg_irq
+        call kprintf    # kprintf(msg_irq);
+
+        mov %ebp, %esp  # Restore stack pointer
+        popa            # Restore all registers
+
+        mov $0x20, %al
+        out %al, $0x20  # send EOI to PIC0
+
+        sti             # Re-enable interrupts
+        iret            # Return from interrupt (resets eflags and what not.)

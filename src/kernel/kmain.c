@@ -37,12 +37,12 @@ void main(multiboot_info_t* bootinfo) {
             "Paging is enabled.\n",
             &_begin, &_end);
 
-    // Test out the call gates
-    asm volatile (
-        "mov %0, %%eax;"
-        "int $0x80;"
-        : /* No output */
-        : "r"(0xDEADBEEF));
+
+    int i;
+    for (i = 0; i < 3; i++) {
+        // Test out the call gates
+        asm volatile ( "int $0x80;" );
+    }
 
     for(;;);
 }
