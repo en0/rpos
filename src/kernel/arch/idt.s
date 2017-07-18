@@ -89,7 +89,8 @@ irq0:       cli
             mov %esp, %ebp
             sub $0x1c, %esp
 
-            movl $0xDEADBEEF, 0x4(%esp)
+            #movl $0xDEADBEEF, 0x4(%esp)
+            movl %eax, 0x4(%esp)
             movl $msg, (%esp)
             call kprintf
 

@@ -38,7 +38,11 @@ void main(multiboot_info_t* bootinfo) {
             &_begin, &_end);
 
     // Test out the call gates
-    asm ("int $0x80");
+    asm volatile (
+        "mov %0, %%eax;"
+        "int $0x80;"
+        : /* No output */
+        : "r"(0xDEADBEEF));
 
     for(;;);
 }
