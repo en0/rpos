@@ -18,36 +18,32 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <kernel.h>
-#include <multiboot.h>
-#include <kprint.h>
-#include <string.h>
-#include <io.h>
+#ifndef __IO_H
+#define __IO_H 1
 
-extern uint32_t rtc_getTicks();
+#include <stdint.h>
 
-void main(multiboot_info_t* bootinfo) {
-
-    /* 
-     * bootinfo points to the multiboot header
-     * end_of_kernel points to the bottom of the stack
-     * We need to lock memory to end_of_kernel and set up a new stack 
-     */
-
-    kprintf("Research Porject Kernel\n"
-            "Kernel starts at %p\n"
-            "Kernel ends at %p\n",
-            "Paging is enabled.\n",
-            &_begin, &_end);
-
-    uint32_t x = rtc_getTicks();
-
-    kprintf("Ticks: %p", x);
-
-    for(;;);
+static inline void outb(uint8_t val, uint16_t port) {
+    asm volatile (
+        "out %0, %1;"
+        : /* no return */
+        : "a"(val), "Nd"(port));
 }
 
-void test() {
-    kprintf("Hello, world %p", 0x1000);
+static inline uint8_t inb(uint16_t port) {
+    uint8_t val;
+    asm volatile (
+        "in %1, %0"
+        : "=a"(val)
+        : "Nd"(port) );
+    return val;
 }
 
+static inline void io_wait(void)
+{
+    asm volatile ( "jmp 1f\n\t"
+                   "1:jmp 2f\n\t"
+                   "2:" );
+}
+
+#endif /* __IO_H */

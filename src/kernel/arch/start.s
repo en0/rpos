@@ -52,30 +52,13 @@ _start: movl $stack, %esp       ## Setup temp stack
         call initGDT
         call initIDT
 
-        # Setup the RTC
-        mov $0b00110100, %al
-        out %al, $0x43
-
-        mov $0x04AA, %ax
-        out %al, $0x40
-        shr $8, %ax
-        out %al, $0x40
-        sti
-        
-
-        #out %al, $0x40
-        #outb $0x04, $0x40
-
-        #outb $0b00110100, $0x43
-        #outb $0xAA, $0x40
-        #outb $0x04, $0x40
-
         ## relocate stack
         push mbi
         ##call find_stack
         ##mov %eax, %esp
 
         call kclear             ## Clear the screen
+        call initRTC
 
         push mbi                ## We have a new stack, Repush the mbi
         ##call system_init      ## Call system_init(mboot*)

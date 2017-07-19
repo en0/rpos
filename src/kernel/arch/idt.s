@@ -153,8 +153,7 @@ irq8:   cli             # Disable interrupts to prevent timer issues.
         pusha           # Backup all registers.
         mov %esp, %ebp  # Backup the stack pointer
 
-        push $msg_irq
-        call kprintf    # kprintf(msg_irq);
+        call rtc_IRQHandler
 
         mov %ebp, %esp  # Restore stack pointer
         popa            # Restore all registers
