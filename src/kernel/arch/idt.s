@@ -37,7 +37,8 @@ idt_info:   .2byte idt_end - idt_start - 1
 initIDT:    lidt idt_info       # Install the new IDT
             ret                 # Head back to start.s
 
-idt_setGate:push %ebp
+idt_setGate:
+            push %ebp
             mov %esp, %ebp
 
             mov $idt_start, %eax
