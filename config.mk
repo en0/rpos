@@ -46,15 +46,7 @@ K_AS=i686-elf-as
 K_AR=i686-elf-ar
 
 # FLAGS
-#K_CFLAGS = -ffreestanding -O2 -Wall -nostdlib -fno-stack-protector
-K_CFLAGS = -O2 -Wall -nostdlib \
-		   -ffreestanding \
-		   -fstrength-reduce \
-		   -fomit-frame-pointer \
-		   -fno-builtin \
-		   -fno-strict-aliasing \
-		   -fno-common \
-		   -fno-stack-protector
+K_CFLAGS = -ffreestanding -O2 -Wall -nostdlib -fno-stack-protector -fno-omit-frame-pointer
 K_ASFLAGS=
 K_LDFLAGS=
 
