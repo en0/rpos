@@ -51,6 +51,8 @@ _start: movl $stack, %esp       ## Setup temp stack
         ## Install Descriptor Tables
         call initGDT
         call initIDT
+        call initIRQ
+        call initRTC
 
         ## relocate stack
         push mbi
@@ -58,7 +60,6 @@ _start: movl $stack, %esp       ## Setup temp stack
         ##mov %eax, %esp
 
         call kclear             ## Clear the screen
-        call initRTC
 
         push mbi                ## We have a new stack, Repush the mbi
         ##call system_init      ## Call system_init(mboot*)

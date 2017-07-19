@@ -22,6 +22,7 @@
         # e.g. install the gdt after the kernel is in higher half.
 
             .global initIDT
+            .global idt_setGate
 
             ## Decsriptor layout
             ## //.2byte offset_1     # Offset1 0..15
@@ -60,6 +61,29 @@ idt_info:   .2byte idt_end - idt_start - 1
             .align 4
 
         # installIDT can be called AFTER the idt has been loaded.
+
+idt_setGate:push %ebp
+            mov %esp, %ebp
+
+            #mov 0x10(%ebp), %ecx    # uint32_t flags
+
+            mov $idt_start, %eax
+            mov 0x8(%ebp), %edx     # Param: uint32_t index
+            lea (%eax,%edx,8), %edx # edx = idt_start + (index * 8)
+
+            mov 0xC(%ebp), %eax     # uint32_t address
+            mov 0x10(%ebp), %ax     # Load type attributes
+            mov %eax, 0x04(%edx)    # Write the second word in the IDT Entry
+
+            mov $0x0008, %eax       # GDT Segment selector (always 0x08)
+            mov 0xC(%ebp), %ebx     # uint32_t address
+            shl $16, %eax           # Mov the segment selector to the top half of eax
+            mov %bx, %ax            # set the lower 16 bits of the address.
+            mov %eax, (%edx)        # Write the first word in the IDT entry
+            
+            mov %ebp, %esp
+            pop %ebp
+            ret
 
 initIDT:    push %ebp           # Backup the stack frame
             mov %esp, %ebp

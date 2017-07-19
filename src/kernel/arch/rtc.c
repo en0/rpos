@@ -18,22 +18,6 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-/*
- * Tested stuff in assembly, works with this:
-
-        # Setup the RTC
-        mov $0b00110100, %al
-        out %al, $0x43
-
-        mov $0x04AA, %ax
-        out %al, $0x40
-        shr $8, %ax
-        out %al, $0x40
-        sti
-
- * We will want to replace this with the static inlines in io.h
- */
-
 #include <io.h>
 #include <kprint.h>
 
@@ -41,6 +25,7 @@ uint32_t _seconds;
 uint16_t _ticks;
 
 void rtc_IRQHandler();
+extern void irq_installHandler(int irq, void(*fn)(uint32_t));
 
 void initRTC() {
 
@@ -58,18 +43,17 @@ void initRTC() {
     _ticks = _seconds = 0;
 
     // Install IRQ Hander
-    // Remeber how to do a fn pointer void func(void(*fn)()) { ... }
-    //idt_install_IRQHandler(rtc_IRQHandler);
+    irq_installHandler(0, &rtc_IRQHandler);
 }
 
 uint32_t rtc_getTicks() {
     return _seconds * 1000 + _ticks;
 }
 
-void rtc_IRQHandler() { 
+void rtc_IRQHandler(int x) { 
     if(++_ticks == 1000) {
         _ticks = 0;
         _seconds++;
-        //kprintf("rtc_getTicks() = %i", rtc_getTicks());
+        //kprintf("rtc_getTicks() = %i\n", rtc_getTicks());
     }
 }

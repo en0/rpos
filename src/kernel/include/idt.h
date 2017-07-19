@@ -18,27 +18,22 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <kernel.h>
-#include <multiboot.h>
-#include <kprint.h>
-#include <string.h>
+#ifndef __IDT_H
+#define __IDT 1
 
-void main(multiboot_info_t* bootinfo) {
+#include <stdint.h>
 
-    /* 
-     * bootinfo points to the multiboot header
-     * end_of_kernel points to the bottom of the stack
-     * We need to lock memory to end_of_kernel and set up a new stack 
-     */
 
-    kprintf("Research Porject Kernel\n"
-            "Kernel starts at %p\n"
-            "Kernel ends at %p\n",
-            "Paging is enabled.\n",
-            &_begin, &_end);
+#define IDT_FLG_PRESENT  0x8000
+#define IDT_FLG_DPL0     0x0000
+#define IDT_FLG_DPL1     0x2000
+#define IDT_FLG_DPL2     0x4000
+#define IDT_FLG_DPL3     0x6000
+#define IDT_FLG_TASKGATE 0x0500
+#define IDT_FLG_INTEGATE 0x0E00
+#define IDT_FLG_TRAPGATE 0x0F00
 
-    asm("sti");
+void initIDT();
+void idt_setGate(uint32_t, void(*)(), uint32_t);
 
-    for(;;);
-}
-
+#endif /* __IDT_H */

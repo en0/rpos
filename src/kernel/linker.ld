@@ -56,9 +56,9 @@ SECTIONS
          * space. That is why kernel end does not take the tstack region into account. */
 
         *(.tstack)
+        .end = .;
     }
 
-    .end = .;
     PROVIDE(_end = .end);
 
 }
