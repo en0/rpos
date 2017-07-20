@@ -7,7 +7,12 @@ I have made many attempts and building an operating system and never achieved my
 ## Goals
 
 - [x] Kernel loads in higher half
-- [ ] Create flat GDT in kernel .text space
+- [x] Create flat GDT in kernel .text space
+- [x] IDT gate install system where other code can install handlers
+- [x] IRQ dispatch system where hardware handlers can install int handers.
+- [x] Serial debuging on COM1
+- [x] Coredump on FAULT/TRAP
+- [x] RTC via PIT Channel 0
 - [ ] Setup physical memory manager
 - [ ] Setup Virtual memory manager
 - [ ] 8MB Stack just under the kernel in the virtual address space.
@@ -23,6 +28,9 @@ I have made many attempts and building an operating system and never achieved my
 - [ ] Kernel will EXEC from boot-time args. The intention is the in-ram-disk path to the shell.
 - [ ] Kernel will facilitate EXECs at runtime but will always fall back to the shell specified in the boot arguments.
 - [ ] Kernel EXEC will expect a staticly linked ELF executable.
+
+## Known Issues To Fix
+- [ ] END flag is not pointing to the correct spot in ram.
  
 Example:
 
