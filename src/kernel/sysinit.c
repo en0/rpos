@@ -38,7 +38,6 @@ extern void* _end;
 #define _START ((void*)&_start)
 #define _END ((void*)&_end)
 
-
 /**
  ** CHECK_FLAG is used to validate flags from 
  ** multiboot. 
@@ -128,5 +127,6 @@ void init_pmem(multiboot_info_t* mbi) {
 void system_init(multiboot_info_t* mbi) {
     validate_boot_env(mbi);
     //init_pmem(mbi);
+    asm("sti");
 }
 

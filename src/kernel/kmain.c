@@ -32,14 +32,17 @@ void main(multiboot_info_t* bootinfo) {
      * We need to lock memory to end_of_kernel and set up a new stack 
      */
 
+    /* Force GP fault
+    int i = 0;
+    for(i = 3; i > -1; i--)
+        kprintf("100 / %i = %i\n", i, 100/i);
+    */
+
     kprintf("Research Porject Kernel\n"
             "Kernel starts at %p\n"
             "Kernel ends at %p\n",
             "Paging is enabled.\n",
             &_begin, &_end);
 
-    asm("sti");
-
-//write_serial_string("...Hello, World!");
     for(;;);
 }

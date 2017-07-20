@@ -49,13 +49,13 @@ _start: movl $stack, %esp       ## Setup temp stack
 
 .start: mov %ebx, (mbi)         ## Backup Multiboot Info
 
+        .ifndef DEBUG
+        ## initialize console debugger
         call initDBG
+        .endif
 
         ## Install Descriptor Tables
         call initGDT
-        call initIDT
-        call initIRQ
-        call initRTC
 
         ## relocate stack
         push mbi
@@ -63,9 +63,14 @@ _start: movl $stack, %esp       ## Setup temp stack
         ##mov %eax, %esp
 
         call kclear             ## Clear the screen
+        call initIDT            ## Offers a way to set gates for other perfs
+        call initIRQ            ## Offers a way to install IRQ handlers.
+        call initRTC            ## Setup the the real time clock using PIT
+        call initFAULT          ## Install kernel panic screens ;)
 
         push mbi                ## We have a new stack, Repush the mbi
-        ##call system_init      ## Call system_init(mboot*)
+        call system_init        ## Call system_init(mboot*)
+.t:
         call main               ## Call main(mboot*)
 
         ## Failed Boot
