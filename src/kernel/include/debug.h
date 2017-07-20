@@ -19,9 +19,12 @@
  **/
 
 #include <stdint.h>
+#include <config.h>
 
 #ifndef __DEBUG_H
 #define __DEBUG_H 1
+
+#ifdef PROFILE_DEBUG
 
 /** Function: dbg_printf(const char *format, ...)
  ** Write the C string to the serial console with the given format.
@@ -75,6 +78,8 @@ int dbg_puts(const char* str);
 /** Setup the hardware to use for writing.  */
 
 void initDEBUG();
+
+#endif /** PROFILE_DEBUG **/
 
 #endif /* __DEBUG */
 

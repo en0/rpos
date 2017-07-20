@@ -16,7 +16,9 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-                #.extern fault_trap
+## Some of this code was addapted from 
+## http://www.osdever.net/tutorials/view/brans-kernel-development-tutorial 
+
                 .extern fault_handler
 
                 .section .text
@@ -37,29 +39,28 @@ fault_stub\num: cli                     # Disable interrupts.
                 jmp fault_common        # goto handler stub
                 .endm
 
-fault_common:   
-    pusha
-    push %ds
-    push %es
-    push %fs
-    push %gs
-    mov $0x10, %ax   # Load the Kernel Data Segment descriptor!
-    mov %ax, %ds
-    mov %ax, %es
-    mov %ax, %fs
-    mov %ax, %gs
-    mov %esp, %eax   # Push us the stack
-    push %eax
-    mov $fault_handler, %eax
-    call *%eax       # A special call, preserves the 'eip' register
-    pop %eax
-    pop %gs
-    pop %fs
-    pop %es
-    pop %ds
-    popa
-    add 8, %esp     # Cleans up the pushed error code and pushed ISR number
-    iret           # pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP!
+fault_common:   pusha                   # Push all GP Registes
+                push %ds                # Push all the segment registers
+                push %es
+                push %fs
+                push %gs
+                mov $0x10, %ax          # Load the Kernel Data Segment
+                mov %ax, %ds
+                mov %ax, %es
+                mov %ax, %fs
+                mov %ax, %gs
+                mov %esp, %eax          # Push up the stack pointer
+                push %eax
+                mov $fault_handler, %eax
+                call *%eax              # Call fault hanlder, preserves the 'eip' register
+                pop %eax
+                pop %gs
+                pop %fs
+                pop %es
+                pop %ds
+                popa                    # Restore GP registers
+                add $8, %esp            # Clean up the stack from fault_stubN
+                iret                    # pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP
 
                 fault_stub 0
                 fault_stub 1

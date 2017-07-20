@@ -49,10 +49,8 @@ _start: movl $stack, %esp       ## Setup temp stack
 
 .start: mov %ebx, (mbi)         ## Backup Multiboot Info
 
-        .ifndef DEBUG
         ## initialize console debugger
         call initDBG
-        .endif
 
         ## Install Descriptor Tables
         call initGDT
@@ -70,7 +68,6 @@ _start: movl $stack, %esp       ## Setup temp stack
 
         push mbi                ## We have a new stack, Repush the mbi
         call system_init        ## Call system_init(mboot*)
-.t:
         call main               ## Call main(mboot*)
 
         ## Failed Boot

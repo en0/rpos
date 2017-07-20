@@ -18,11 +18,10 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <io.h>
+#include <cpu.h>
 #include <string.h>
 #include <kprint.h>
 #include <debug.h>
-#include <idt.h>
 
 #define PIC0            0x20
 #define PIC0_DATA       0x21
@@ -66,7 +65,7 @@ void pic_remap(uint32_t, uint32_t);
 void irq_disable(uint32_t);
 void irq_enable(uint32_t);
 
-void(*_vectors[16])(uint32_t);
+void(*_vectors[16])(regs_t*);
 
 void initIRQ() {
 
@@ -113,7 +112,7 @@ void initIRQ() {
     idt_setGate(0x2f, &irq_stub15, IDT_FLG_PRESENT | IDT_FLG_DPL0 | IDT_FLG_INTEGATE);
 }
 
-void irq_installHandler(int irq, void(*fn)(uint32_t)) {
+void irq_installHandler(int irq, void(*fn)(regs_t*)) {
 
     // Install the fn route in the vector that irqEntryN will call
     _vectors[irq] = fn;
@@ -152,17 +151,15 @@ void irq_enable(uint32_t n) {
     outb(val, port);
 }
 
-void irq_dispatch(uint32_t n) {
-
-    if(_vectors[n] != NULL)
-        _vectors[n](n);
-
-#ifndef DEBUG
+void irq_dispatch(regs_t *r) {
+    if(_vectors[r->int_no] != NULL)
+        _vectors[r->int_no](r);
+#ifdef PROFILE_DEBUG
     else 
-        dbg_printf("Unhandled IRQ: %i\n", n);
+        dbg_printf("Unhandled IRQ: %i\n", r->int_no);
 #endif
 
-    if(n >= 8) outb(PIC_EOI, PIC1);
+    if(r->int_no >= 8) outb(PIC_EOI, PIC1);
     outb(PIC_EOI, PIC0);
 }
 

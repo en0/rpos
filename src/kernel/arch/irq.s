@@ -16,6 +16,9 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+## Some of this code was addapted from 
+## http://www.osdever.net/tutorials/view/brans-kernel-development-tutorial 
+
                 .extern irq_dispatch
 
                 .section .text
@@ -24,17 +27,39 @@
                 .macro irq_stub num
                 .global irq_stub\num
 irq_stub\num:   cli                     # Disable interrupts.
-                pusha                   # Backup all GP Registers
-                mov %esp, %ebp          # Backup the stack ponter
-                push $\num              # Push the irq number onto the stack.
+                push $0x0               # Push a empty errorCode
+                push $\num              # Push the IRQ number onto the stack.
                 jmp irq_common          # goto handler stub
                 .endm
 
-irq_common:     call irq_dispatch       # Call the vector dispatch in irq.c
-                mov %ebp, %esp          # Restore stack pointer
-                popa                    # Restore all GP registers
-                sti                     # Turn on interrupts.
-                iret                    # Go back to what we where doing.
+irq_common:     pusha                   # Push all GP Registes
+                push %ds                # Push all the segment registers
+                push %es
+                push %fs
+                push %gs
+                mov $0x10, %ax          # Load the Kernel Data Segment.
+                mov %ax, %ds
+                mov %ax, %es
+                mov %ax, %fs
+                mov %ax, %gs
+                mov %esp, %eax          # Push up the stack pointer
+                push %eax
+                mov $irq_dispatch, %eax
+                call *%eax              # Call irq_dispatch, preserves the 'eip' register
+                pop %eax
+                pop %gs
+                pop %fs
+                pop %es
+                pop %ds
+                popa                    # Restore GP registers
+                add $8, %esp            # Clean up the stack from irq_stubN
+
+                # NOTE ------------------------------------------
+                # iret will pop EFLAGS which contains the
+                # original state of the interrupt enable flag. 
+                # This will effectivly turn interrupts back on.
+
+                iret                    # pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP
 
                 irq_stub 0
                 irq_stub 1

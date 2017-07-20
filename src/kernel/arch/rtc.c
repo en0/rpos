@@ -18,12 +18,9 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <io.h>
+#include <cpu.h>
 #include <kprint.h>
-
-#ifndef DEBUG
 #include <debug.h>
-#endif
 
 uint32_t _seconds;
 uint16_t _ticks;
@@ -54,11 +51,11 @@ uint32_t rtc_getTicks() {
     return _seconds * 1000 + _ticks;
 }
 
-void rtc_IRQHandler(int x) { 
+void rtc_IRQHandler(regs_t *r) { 
     if(++_ticks == 1000) {
         _ticks = 0;
         _seconds++;
-#ifndef DEBUG
+#ifdef PROFILE_DEBUG
         dbg_printf("rtc_getTicks() = %i\n", rtc_getTicks());
 #endif
     }

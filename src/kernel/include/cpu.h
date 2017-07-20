@@ -18,21 +18,26 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#ifndef __IDT_H
-#define __IDT 1
+#ifndef __CPU_H
+#define __CPU_H 1
 
-#include <stdint.h>
+#include <io.h>
+#include <idt.h>
 
-#define IDT_FLG_PRESENT  0x8000
-#define IDT_FLG_DPL0     0x0000
-#define IDT_FLG_DPL1     0x2000
-#define IDT_FLG_DPL2     0x4000
-#define IDT_FLG_DPL3     0x6000
-#define IDT_FLG_TASKGATE 0x0500
-#define IDT_FLG_INTEGATE 0x0E00
-#define IDT_FLG_TRAPGATE 0x0F00
+typedef struct regs {
+    unsigned int gs, fs, es, ds;
+    unsigned int edi, esi, ebp, esp, ebx, edx, ecx, eax;
+    unsigned int int_no, err_code;
+    unsigned int eip, cs, eflags, useresp, ss;
+} regs_t;
 
-void initIDT();
-void idt_setGate(uint32_t, void(*)(), uint32_t);
 
-#endif /* __IDT_H */
+static inline void sti() {
+    asm volatile ("sti");
+}
+
+static inline void halt() {
+    for(;;) asm volatile ("hlt");
+}
+
+#endif /** __CPU_H **/

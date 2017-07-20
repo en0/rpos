@@ -18,6 +18,7 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
+#include <cpu.h>
 #include <multiboot.h>
 // #include <pmem.h>
 
@@ -127,6 +128,6 @@ void init_pmem(multiboot_info_t* mbi) {
 void system_init(multiboot_info_t* mbi) {
     validate_boot_env(mbi);
     //init_pmem(mbi);
-    asm("sti");
+    sti();
 }
 

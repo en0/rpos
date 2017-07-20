@@ -22,7 +22,7 @@
 #include <multiboot.h>
 #include <kprint.h>
 #include <string.h>
-#include <io.h>
+#include <cpu.h>
 
 void main(multiboot_info_t* bootinfo) {
 
@@ -32,7 +32,7 @@ void main(multiboot_info_t* bootinfo) {
      * We need to lock memory to end_of_kernel and set up a new stack 
      */
 
-    /* Force GP fault
+    /* Cause a divide by zero fault
     int i = 0;
     for(i = 3; i > -1; i--)
         kprintf("100 / %i = %i\n", i, 100/i);

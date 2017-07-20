@@ -18,22 +18,18 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <io.h>
+/** 
+ * Some of this code was addapted from 
+ ** http://www.osdever.net/tutorials/view/brans-kernel-development-tutorial
+ **/
+
+
+#include <cpu.h>
 #include <string.h>
 #include <kprint.h>
 #include <debug.h>
-#include <idt.h>
 
-typedef struct regs
-{
-    unsigned int gs, fs, es, ds;
-    unsigned int edi, esi, ebp, esp, ebx, edx, ecx, eax;
-    unsigned int int_no, err_code;
-    unsigned int eip, cs, eflags, useresp, ss;
-} regs_t;
-
-const char *exception_messages[] =
-{
+const char *exception_messages[] = {
     "Division By Zero",
     "Debug",
     "Non Maskable Interrupt",
@@ -117,15 +113,16 @@ void initFAULT() {
     idt_setGate(0x1E, &fault_stub30, IDT_FLG_PRESENT | IDT_FLG_DPL0 | IDT_FLG_INTEGATE);
 }
 
-void fault_handler(regs_t *r)
-{
+void fault_handler(regs_t *r) {
 
+#ifdef PROFILE_DEBUG
     dbg_printf("\n\n!!! FAULT %i(%i) - %s !!!\n\n", r->int_no, r->err_code, exception_messages[r->int_no]);
     dbg_printf("--- CORE DUMP -----------------------------------------------------\n");
     dbg_printf("eax: %p, ebx: %p, ecx: %p, edx: %p\n", r->eax, r->ebx, r->ecx, r->edx);
     dbg_printf("esp: %p, ebp: %p, esi: %p, edi: %p\n", r->esp, r->ebp, r->esi, r->edi);
     dbg_printf("cs: %p, ss: %p, ds: %p, es: %p\n", r->cs, r->ss, r->ds, r->es);
     dbg_printf("fs: %p, gs: %p, eip: %p, eflags: %b\n", r->fs, r->gs, r->eip, r->eflags);
+#endif
 
     kclear();
     kprintf("\n\n!!! FAULT %i(%i) - %s !!!\n\n", r->int_no, r->err_code, exception_messages[r->int_no]);
@@ -140,5 +137,5 @@ void fault_handler(regs_t *r)
     // so that things like the PMEM code can assert there own fault_handler
     // for specific interrupts.
 
-    for (;;) asm("hlt");
+    halt();
 }
