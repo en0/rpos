@@ -19,6 +19,7 @@
         .global _start
         .extern initIDT
         .extern initGDT
+        .extern initDBG
         .extern kprintf
         .extern kclear
 
@@ -47,6 +48,8 @@ _start: movl $stack, %esp       ## Setup temp stack
         call kabort             ## Abort with message
 
 .start: mov %ebx, (mbi)         ## Backup Multiboot Info
+
+        call initDBG
 
         ## Install Descriptor Tables
         call initGDT

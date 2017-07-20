@@ -22,6 +22,7 @@
 #include <multiboot.h>
 #include <kprint.h>
 #include <string.h>
+#include <io.h>
 
 void main(multiboot_info_t* bootinfo) {
 
@@ -39,6 +40,6 @@ void main(multiboot_info_t* bootinfo) {
 
     asm("sti");
 
+//write_serial_string("...Hello, World!");
     for(;;);
 }
-

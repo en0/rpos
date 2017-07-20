@@ -20,11 +20,12 @@
 
 #include <stdint.h>
 
-#ifndef __KPRINT_H
-#define __KPRINT_H 1
+#ifndef __DEBUG_H
+#define __DEBUG_H 1
 
-/** Function: kprintf(const char *format, ...)
- ** Write the C string pointed by format to the text mode video memory.
+/** Function: dbg_printf(const char *format, ...)
+ ** Write the C string to the serial console with the given format.
+
  ** If format includes format specifiers, then additional arguments following
  ** format are formatted and inserted into the resulting string, replacing
  ** their respective specifiers.
@@ -43,10 +44,10 @@
  **   On success, the total number of characters written is returned.
  **   On error, -1 is returned. */
 
-int kprintf(const char *format, ...);
+int dbg_printf(const char *format, ...);
 
-/** Function: int kputchar(int character)
- ** Writes a character to the text mode video memory
+/** Function: int dbg_putchar(int character)
+ ** Writes a character to the serial console
  **
  ** Arguments:
  **   character - The int promotion fo the character to be written.
@@ -56,10 +57,10 @@ int kprintf(const char *format, ...);
  **   On Success, the value of the character being written is returned
  **   On Error, -1 is returned */
 
-int kputchar(int character);
+int dbg_putchar(int character);
 
-/** Function: int kputs(const char* str)
- ** Writes the C string pointed to by str to the text mode video memory and 
+/** Function: int dbg_puts(const char* str)
+ ** Writes the C string pointed to by str to the serial console and
  ** appends a newline character ('\n')
  ** 
  ** Arguments:
@@ -69,18 +70,11 @@ int kputchar(int character);
  **   On success, the total number of characters written is returned.
  **   On error, -1 is returned. */
 
-int kputs(const char* str);
+int dbg_puts(const char* str);
 
-/** Function: int kclear()
- ** Writes space to the screen that will cause all text to scrolle off.
- ** 
- ** Arguments:
- **   None
- ** 
- ** Returns:
- **   None */
+/** Setup the hardware to use for writing.  */
 
-void kclear();
+void initDEBUG();
 
-#endif /* __KPRINTF */
+#endif /* __DEBUG */
 

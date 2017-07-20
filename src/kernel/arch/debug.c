@@ -1,3 +1,4 @@
+
 /**
  ** Copyright (c) 2017 "Ian Laird"
  ** Research Project Operating System (rpos) - https://github.com/en0/rpos
@@ -18,63 +19,70 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <kprint.h>
+#include <config.h>
+
+#ifdef PROFILE_DEBUG
+
+#include <io.h>
 #include <stdarg.h>
 #include "string.h"
 
-#define VIDEO_MEMORY 0xB8000
-#define VIDEO_COLOR 0x04 // Red on black
-#define TAB_WIDTH 4
-#define SCREEN_WIDTH 80
-#define SCREEN_HEIGHT 25
-#define SCREEN_CHAR_WIDTH 2
-#define SCREEN_MAX_CURSOR (SCREEN_WIDTH * SCREEN_HEIGHT)
-#define SCREEN_LAST_LINE_HOME (SCREEN_MAX_CURSOR - SCREEN_WIDTH)
-#define SCREEN_REAL_WIDTH (SCREEN_WIDTH * SCREEN_CHAR_WIDTH)
-
-typedef volatile uint16_t vidtext_t;
-typedef uint32_t kfpos_t;
-
-kfpos_t _cursor = 0;
-vidtext_t* _video_memory = (vidtext_t*)VIDEO_MEMORY;
+#define COM1 0x3f8
 
 extern char* itoa(int value, char* str, int base);
 extern char* uitoa(int value, char* str, int base);
 
-int _set_color(char character, int color) {
-    return (((int)character) & 0xFF) | (color << 8);
+void initDBG() {
+    outb(0x00, COM1+1);
+    outb(0x80, COM1+3);
+    outb(0x03, COM1+0);
+    outb(0x00, COM1+1);
+    outb(0x03, COM1+3);
+    outb(0xC7, COM1+2);
+    outb(0x0B, COM1+4);
 }
 
-void _scroll() {
+int is_transmit_empty() {
+   return inb(COM1 + 5) & 0x20;
+}
+ 
+void write_serial(char a) {
+   while (is_transmit_empty() == 0);
+   outb(a, COM1);
+}
 
-    void* v;
-    int i;
+void write_serial_string(char *str) {
+    for(; *str != '\0'; write_serial(*str), str++);
+}
 
-    if (_cursor >= SCREEN_MAX_CURSOR) {
+int dbg_putchar(int character) {
 
-        v = (char*)VIDEO_MEMORY;
+    switch((char)(character & 0xFF)) {
 
-        for(i = 0; i < SCREEN_HEIGHT-1; i++, v+=SCREEN_REAL_WIDTH)
-            memcpy(v, v+SCREEN_REAL_WIDTH, SCREEN_REAL_WIDTH);
+        case '\r':
+        case '\b':
+            /* skip */
+            break;
 
-        // fill last row with spaces
-        for(i = 0; i < SCREEN_WIDTH; i++, v+=2) 
-            *(vidtext_t*)v = _set_color(' ', VIDEO_COLOR);
-
-        _cursor = SCREEN_LAST_LINE_HOME;
+        default:
+            write_serial(character);
+            break;
     }
+
+    return character;
 }
 
-void kclear() {
 
+int dbg_puts(const char* str) {
     int i;
-
-    for(i = 0; i < SCREEN_HEIGHT*2; i++)
-        kputchar('\n');
-    _cursor = 0;
+    for(i = 1; *str != '\0'; str++, i++)
+        dbg_putchar((int)*str);
+    dbg_putchar('\n');
+    return i;
 }
 
-int kprintf(const char *format, ...) {
+int dbg_printf(const char *format, ...) {
+
     const char *p;
     int _ret = 0;
 
@@ -86,29 +94,28 @@ int kprintf(const char *format, ...) {
     va_start(params, format);
 
     for(p = format; *p != '\0'; p++) {
-
         if(*p != '%') {
-            kputchar((int)*p);
+            dbg_putchar((int)*p);
             _ret++;
             continue;
         }
 
         switch(*++p) {
             case '%' : /* Literal % */
-                kputchar((int)'%');
+                dbg_putchar((int)'%');
                 _ret++;
                 break;
 
             case 'c' : /* Charater */
                 va_char = va_arg(params, int);
-                kputchar(va_char);
+                dbg_putchar(va_char);
                 _ret++;
                 break;
 
             case 's' : /* C String */
                 va_str = (char*)va_arg(params, int);
                 for(;*va_str != '\0'; va_str++) {
-                    kputchar((int)(*va_str));
+                    dbg_putchar((int)(*va_str));
                     _ret++;
                 }
                 break;
@@ -117,38 +124,38 @@ int kprintf(const char *format, ...) {
             case 'i' :
                 va_char = (int)va_arg(params, int);
                 itoa(va_char, buffer, 10);
-                kprintf(buffer);
+                dbg_printf(buffer);
                 break;
 
             case 'u' : /* Unsigned Integer */
                 va_char = (int)va_arg(params, int);
                 uitoa(va_char, buffer, 10);
-                kprintf(buffer);
+                dbg_printf(buffer);
                 break;
 
             case 'x' : /* Unsigned Hex (lower case only) */
             case 'X' : 
                 va_char = (int)va_arg(params, int);
                 uitoa(va_char, buffer, 16);
-                kprintf(buffer);
+                dbg_printf(buffer);
                 break;
                 
             case 'o' : /* Unsigned Octal */
                 va_char = (int)va_arg(params, int);
                 uitoa(va_char, buffer, 8);
-                kprintf(buffer);
+                dbg_printf(buffer);
                 break;
 
             case 'p' : /* Pointer */
                 va_char = (int)va_arg(params, int);
                 uitoa(va_char, buffer, 16);
-                kprintf("0x%s", buffer);
+                dbg_printf("0x%s", buffer);
                 break;
             
             case 'b' : /* Binary */
                 va_char = (int)va_arg(params, int);
                 uitoa(va_char, buffer, 2);
-                kprintf("%sb", buffer);
+                dbg_printf("%sb", buffer);
 
             case 'n' : /* nothing (Param must be an int) */
                 va_char = (int)va_arg(params, int);
@@ -160,42 +167,4 @@ int kprintf(const char *format, ...) {
     return 0;
 }
 
-
-int kputchar(int character) {
-    int i;
-
-    switch((char)(character & 0xFF)) {
-
-        case '\n':
-            _cursor += SCREEN_WIDTH;
-        case '\r':
-            _cursor -= (_cursor % SCREEN_WIDTH);
-            break;
-
-        case '\b':
-            if (_cursor > 0)
-                _video_memory[--_cursor] = _set_color(' ', VIDEO_COLOR);
-            break;
-
-        case '\t':
-            kputchar(0x20);
-            for(i = 0; i < (_cursor) % TAB_WIDTH; i++)
-                kputchar(0x20);
-            break;
-
-        default:
-            _video_memory[_cursor++] = _set_color(character, VIDEO_COLOR);
-            break;
-    }
-    _scroll();
-    return character;
-}
-
-
-int kputs(const char* str) {
-    int i;
-    for(i = 1; *str != '\0'; str++, i++)
-        kputchar((int)*str);
-    kputchar('\n');
-    return i;
-}
+#endif /** PROFILE_DEBUG **/

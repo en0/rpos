@@ -21,6 +21,7 @@
 #include <io.h>
 #include <string.h>
 #include <kprint.h>
+#include <debug.h>
 #include <idt.h>
 
 #define PIC0            0x20
@@ -132,8 +133,8 @@ void irq_disable(uint32_t n) {
         n -= 8;
     }
 
-    val = inb(port) & (1<<n);
-    outb(val, PIC0_DATA);
+    val = inb(port) | (1<<n);
+    outb(val, port);
 }
 
 void irq_enable(uint32_t n) {
@@ -148,13 +149,18 @@ void irq_enable(uint32_t n) {
     }
 
     val = inb(port) & ~(1<<n);
-    outb(val, PIC0_DATA);
+    outb(val, port);
 }
 
 void irq_dispatch(uint32_t n) {
 
     if(_vectors[n] != NULL)
         _vectors[n](n);
+
+#ifndef DEBUG
+    else 
+        dbg_printf("Unhandled IRQ: %i\n", n);
+#endif
 
     if(n >= 8) outb(PIC_EOI, PIC1);
     outb(PIC_EOI, PIC0);

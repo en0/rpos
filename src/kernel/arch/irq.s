@@ -21,14 +21,14 @@
                 .section .text
                 .align 4
 
-.macro irq_stub num
+                .macro irq_stub num
                 .global irq_stub\num
 irq_stub\num:   cli                     # Disable interrupts.
                 pusha                   # Backup all GP Registers
                 mov %esp, %ebp          # Backup the stack ponter
                 push $\num              # Push the irq number onto the stack.
                 jmp irq_common          # goto handler stub
-.endm
+                .endm
 
 irq_common:     call irq_dispatch       # Call the vector dispatch in irq.c
                 mov %ebp, %esp          # Restore stack pointer

@@ -21,6 +21,10 @@
 #include <io.h>
 #include <kprint.h>
 
+#ifndef DEBUG
+#include <debug.h>
+#endif
+
 uint32_t _seconds;
 uint16_t _ticks;
 
@@ -54,6 +58,8 @@ void rtc_IRQHandler(int x) {
     if(++_ticks == 1000) {
         _ticks = 0;
         _seconds++;
-        //kprintf("rtc_getTicks() = %i\n", rtc_getTicks());
+#ifndef DEBUG
+        dbg_printf("rtc_getTicks() = %i\n", rtc_getTicks());
+#endif
     }
 }
