@@ -18,26 +18,20 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <cpu.h>
+#include <config.h>
+#include <kernel.h>
 #include <multiboot.h>
-// #include <pmem.h>
+#include <cpu.h>
 
-/** 
- ** _start and _end are exposed via linker script 
- ** to identify the begining and end of the kernel
- ** image. The values in these pointers are not 
- ** valid. It is the location of the symbol that is
- ** important.
- ** 
- ** The 2 macros, _START and _END, are defined to 
- ** ensure the proper use of these values.
- **/
+extern void initGDT();
+extern void initIDT();
+extern void initIRQ();
+extern void initFAULT();
+extern void initRTC();
 
-extern void* _start;
-extern void* _end;
-
-#define _START ((void*)&_start)
-#define _END ((void*)&_end)
+#ifdef PROFILE_DEBUG
+extern void initDBG();
+#endif
 
 /**
  ** CHECK_FLAG is used to validate flags from 
@@ -46,14 +40,6 @@ extern void* _end;
 
 #define CHECK_FLAG(a,b) ((a & b) == b)
 
-
-/**
- ** kabort is defined in startup.s. It will
- ** print the provided error message and halt the 
- ** system.
- **/
-
-extern void kabort(const char*);
 
 void validate_boot_env(multiboot_info_t* mbi) {
 
@@ -80,23 +66,20 @@ void validate_boot_env(multiboot_info_t* mbi) {
     /** MBOOT Sanity Check **/
     if( CHECK_FLAG(mbi->flags, MULTIBOOT_INFO_AOUT_SYMS) && 
         CHECK_FLAG(mbi->flags, MULTIBOOT_INFO_ELF_SHDR)) {
-        asm volatile("hlt");
-        //kabort("ERROR: Multiboot data is not sane!\n");
+        kabort("ERROR: Multiboot data is not sane!\n");
     }
 
     /** Need memory info **/
     if( !CHECK_FLAG(mbi->flags, MULTIBOOT_INFO_MEM_MAP) ||
         !CHECK_FLAG(mbi->flags, MULTIBOOT_INFO_MEMORY)) {
-        asm volatile("hlt");
-        //kabort("ERROR: No memory information provided by boot loader!\n");
+        kabort("ERROR: No memory information provided by boot loader!\n");
     }
 
     /** Need a boot device **/
     if( !CHECK_FLAG(mbi->flags, MULTIBOOT_INFO_MODS) &&
       ( !CHECK_FLAG(mbi->flags, MULTIBOOT_INFO_BOOTDEV) ||
         !CHECK_FLAG(mbi->flags, MULTIBOOT_INFO_DRIVE_INFO))) {
-        asm volatile("hlt");
-        //kabort("ERROR: No boot device!\n");
+        kabort("ERROR: No boot device!\n");
     }
 }
 
@@ -126,8 +109,21 @@ void init_pmem(multiboot_info_t* mbi) {
 }
 
 void system_init(multiboot_info_t* mbi) {
+
     validate_boot_env(mbi);
+
+    initGDT();
+    initIDT();
+    initIRQ();
+    initFAULT();
+    initRTC();
+
+#ifdef PROFILE_DEBUG
+    initDBG();
+#endif
+
     //init_pmem(mbi);
     sti();
+
 }
 

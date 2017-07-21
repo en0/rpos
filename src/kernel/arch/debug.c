@@ -167,14 +167,4 @@ int dbg_printf(const char *format, ...) {
     return 0;
 }
 
-#else /** PROFILE_DEBUG **/
-
-/* 
- * If debugging is disabled, the start.c will still try to initialize the debug
- * console. Here we provide a stub to answer that call. All other refrences to
- * dbg_* commands should be wrapped in a #ifdef PROFILE_DEBUG macro.
- */
-
-static void initDBG() {}
-
 #endif /** PROFILE_DEBUG **/

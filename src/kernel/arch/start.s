@@ -17,6 +17,7 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
         .global _start
+        .global kabort
         .extern initIDT
         .extern initGDT
         .extern initDBG
@@ -49,23 +50,7 @@ _start: movl $stack, %esp       ## Setup temp stack
 
 .start: mov %ebx, (mbi)         ## Backup Multiboot Info
 
-        ## initialize console debugger
-        call initDBG
-
-        ## Install Descriptor Tables
-        call initGDT
-
-        ## relocate stack
-        push mbi
-        ##call find_stack
-        ##mov %eax, %esp
-
         call kclear             ## Clear the screen
-        call initIDT            ## Offers a way to set gates for other perfs
-        call initIRQ            ## Offers a way to install IRQ handlers.
-        call initRTC            ## Setup the the real time clock using PIT
-        call initFAULT          ## Install kernel panic screens ;)
-
         push mbi                ## We have a new stack, Repush the mbi
         call system_init        ## Call system_init(mboot*)
         call main               ## Call main(mboot*)

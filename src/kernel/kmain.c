@@ -26,23 +26,26 @@
 
 void main(multiboot_info_t* bootinfo) {
 
-    /* 
-     * bootinfo points to the multiboot header
-     * end_of_kernel points to the bottom of the stack
-     * We need to lock memory to end_of_kernel and set up a new stack 
-     */
+    int i = 0;
+    for(i = 0; i < 80; i++, kputchar('='));
+    kputs(  "                       _/_/_/    _/_/_/      _/_/      _/_/_/   \n"
+            "                      _/    _/  _/    _/  _/    _/  _/          \n"
+            "                     _/_/_/    _/_/_/    _/    _/    _/_/       \n"
+            "                    _/    _/  _/        _/    _/        _/      \n"
+            "                   _/    _/  _/          _/_/    _/_/_/         ");
+    for(i = 0; i < 80; i++, kputchar('='));
+                                             
+  
+    kprintf("[-] Kernel starts at %p\n"
+            "[-] Kernel ends at %p\n"
+            "[-] Kernel space size is %i KB\n",
+            MMAP_KERNEL, MMAP_EKERNEL, 
+            (MMAP_EKERNEL - MMAP_KERNEL) / 1024);
 
     /* Cause a divide by zero fault
-    int i = 0;
     for(i = 3; i > -1; i--)
         kprintf("100 / %i = %i\n", i, 100/i);
     */
-
-    kprintf("Research Porject Kernel\n"
-            "Kernel starts at %p\n"
-            "Kernel ends at %p\n"
-            "Paging is enabled.\n",
-            &_kernel, &_ekernel);
 
     for(;;);
 }
