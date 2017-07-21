@@ -40,9 +40,9 @@ void main(multiboot_info_t* bootinfo) {
 
     kprintf("Research Porject Kernel\n"
             "Kernel starts at %p\n"
-            "Kernel ends at %p\n",
+            "Kernel ends at %p\n"
             "Paging is enabled.\n",
-            &_begin, &_end);
+            &_kernel, &_ekernel);
 
     for(;;);
 }

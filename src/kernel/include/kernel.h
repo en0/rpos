@@ -25,11 +25,11 @@
 #include <stdbool.h>
 #include <pmem.h>
 
-extern void* _begin;
-extern void* _end;
+extern void* _kernel;
+extern void* _ekernel;
 
-#define _BEGIN ((void*)&_begin)
-#define _END ((void*)&_end)
+#define _KERNEL ((void*)&_kernel)
+#define _EKERNEL ((void*)&_ekernel)
 
 #endif /* __KERNEL_H */
 

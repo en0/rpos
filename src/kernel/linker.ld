@@ -27,7 +27,7 @@ SECTIONS
 
     . = 0xC0100000;
 
-    PROVIDE(_begin = .);
+    PROVIDE(_kernel = .);
 
     /* First put the multiboot header, as it is required to be put very early
      * early in the image or the bootloader won't recognize the file format.
@@ -56,9 +56,8 @@ SECTIONS
          * space. That is why kernel end does not take the tstack region into account. */
 
         *(.tstack)
-        .end = .;
     }
 
-    PROVIDE(_end = .end);
-
+    .end = .;
+    PROVIDE(_ekernel = .end);
 }
