@@ -24,6 +24,7 @@
 #include <string.h>
 #include <cpu.h>
 
+extern void* LDRPDT;
 void main(multiboot_info_t* bootinfo) {
 
     int i = 0;
@@ -36,11 +37,17 @@ void main(multiboot_info_t* bootinfo) {
     for(i = 0; i < 80; i++, kputchar('='));
                                              
   
-    kprintf("[-] Kernel starts at %p\n"
-            "[-] Kernel ends at %p\n"
-            "[-] Kernel space size is %i KB\n",
-            MMAP_KERNEL, MMAP_EKERNEL, 
-            (MMAP_EKERNEL - MMAP_KERNEL) / 1024);
+    kprintf("[-] Kernel starts at %p\n", MMAP_KERNEL);
+    kprintf("[-] Kernel ends at %p\n", MMAP_EKERNEL);
+    kprintf("[-] Kernel space size is %i KB\n", (MMAP_EKERNEL - MMAP_KERNEL) / 1024);
+    kprintf("[-] LDR Page Table is at %p\n", &LDRPDT);
+
+    // The PMEM Map needs to be 4k aligned so it ends up addressed in virtual
+    // memory space correctly.  Below will compute that address but it does NOT
+    // account for modules loaded in by the boot loader. Really we need to look
+    // at the multiboot data to figure out where to put this thing and it has
+    // to be 4k aligned.
+    kprintf("\nPMEM map should be located at %p\n", ((uint32_t)MMAP_EKERNEL >> 12 << 12) + 0x1000);
 
     /* Cause a divide by zero fault
     for(i = 3; i > -1; i--)
