@@ -30,7 +30,7 @@ I have made many attempts and building an operating system and never achieved my
 - [ ] Kernel EXEC will expect a staticly linked ELF executable.
 
 ## Known Issues To Fix
-- [ ] END flag is not pointing to the correct spot in ram.
+- [x] END flag is not pointing to the correct spot in ram.
  
 Example:
 
