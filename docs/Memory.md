@@ -1,4 +1,6 @@
-[<< Back](index.md)
+[<< Back](README.md)
+
+---
 
 # Memory Management Planning
 
@@ -101,3 +103,7 @@ and what not.
 This is where the user code (including rodata, bss, and text) will be mapped
 to. ELF will identify its section location and it will be obeyed but this is
 where the application should be linked to.
+
+---
+
+[<< Back](README.md)

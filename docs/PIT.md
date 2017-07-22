@@ -1,4 +1,6 @@
-[<< Back](index.md)
+[<< Back](README.md)
+
+---
 
 ## Notes on PIT
 
@@ -74,3 +76,7 @@ connected directly to the PC Speaker
 - Mode/Command  register: 0x43
 - GATE 2 is connected to IO port 0x61 (bit 0)
 - OUT 2 is connected to IO port 0x61 (bit 5)
+
+---
+
+[<< Back](README.md)

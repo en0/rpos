@@ -7,7 +7,7 @@ my goal to satisfaction. After a significant amount of leanring and
 continuously misplacing my code, I have decided to keep it as simple as
 possible.
 
-[Link to docs](docs/index.md)
+[Link to docs](docs/README.md)
 
 ## Goals
 
