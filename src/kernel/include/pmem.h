@@ -28,13 +28,19 @@
 /** void* pmem_alloc();                                 **
  ** allocate a 4Kb page                                 **/
 
+void* pmem_alloc();
+
 /** void* pmem_alloc_low();                             **
  ** Allocate a 4Kb page from lower memory               **/
+
+void* pmem_alloc_low();
 
 /** void pmem_free(void* addr);                         **
  ** free a 4Kb page                                     **
  ** Arguments:                                          **
  ** - addr : The memory address to free.                **/
+
+void pmem_free(void* addr);
 
 /** void pmem_lock_region(void* addr, uint32_t size);   **
  ** Lock a range of pages                               **
@@ -42,30 +48,23 @@
  ** - addr : physical address, The start of the region  **
  ** - size : the size of the region.                    **/
 
+void pmem_lock_region(void* addr, uint32_t size);
+
 /** void pmem_free_region(void* addr, uint32_t size);   **
  ** Free a range of pages                               **
  ** Arguments:                                          **
  ** - addr : physical address, The start of the region  **
  ** - size : the size of the region.                    **/
 
-/** void pmem_init(void* map_start, uint32_t size);     **
+void pmem_free_region(void* addr, uint32_t size);
+
+/** void initPMEM(void* map_start, uint32_t size);     **
  ** Initialize the physical memory manager              **
  ** Arguments:                                          **
  ** - map_start : physical address to start the map     **
  ** - size : The total size of memory in KB             **/
 
-#ifdef ARCH_x86
-#include <x86_pmem.h>
-#define pmem_page_count x86_pmem_page_count
-#define pmem_page_size x86_pmem_page_size
-#define pmem_alloc x86_pmem_alloc
-#define pmem_alloc_low x86_pmem_alloc_low
-#define pmem_free x86_pmem_free
-#define pmem_lock_region x86_pmem_lock_region
-#define pmem_free_region x86_pmem_free_region
-#define pmem_map_end x86_pmem_map_end
-#define pmem_init x86_pmem_init
-#endif /** ARCH_x86 **/
+void initPMEM();
 
 #endif /* __PMEM_H */
 

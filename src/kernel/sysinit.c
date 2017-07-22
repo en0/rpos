@@ -22,6 +22,7 @@
 #include <kernel.h>
 #include <multiboot.h>
 #include <cpu.h>
+#include <pmem.h>
 
 extern void initGDT();
 extern void initIDT();
@@ -85,13 +86,10 @@ void validate_boot_env(multiboot_info_t* mbi) {
 
 void init_pmem(multiboot_info_t* mbi) {
 
-    /*
-    void* STACK_END = find_stack(mbi);
-
-    pmem_init(_END, (mbi->mem_upper + mbi->mem_lower));
-
     multiboot_memory_map_t *mmap;
-    for (mmap = (multiboot_memory_map_t *) mbi->mmap_addr;
+
+    // Free the memory that the bootloader says is physicly available.
+    for(mmap = (multiboot_memory_map_t *) mbi->mmap_addr;
         (unsigned long) mmap < mbi->mmap_addr + mbi->mmap_length;
         mmap = (multiboot_memory_map_t *) ((unsigned long) mmap + mmap->size + sizeof (mmap->size))) {
 
@@ -101,11 +99,10 @@ void init_pmem(multiboot_info_t* mbi) {
     }
 
     // Lock kernel memory, the memory map, and the stack region
-    pmem_lock_region(_START, (STACK_END - _START));
+    pmem_lock_region(PHYS_MMAP_KERNEL, (PHYS_MMAP_EKERNEL - PHYS_MMAP_KERNEL));
 
     // Lock the first page. it just messes up NULL checking
     pmem_lock_region(0x00, 4096);
-    */
 }
 
 void system_init(multiboot_info_t* mbi) {
@@ -114,15 +111,17 @@ void system_init(multiboot_info_t* mbi) {
 
     initGDT();
     initIDT();
-    initIRQ();
-    initFAULT();
-    initRTC();
 
 #ifdef PROFILE_DEBUG
     initDBG();
 #endif
 
-    //init_pmem(mbi);
+    initIRQ();
+    initFAULT();
+    initRTC();
+    initPMEM();
+
+    init_pmem(mbi);
     sti();
 
 }

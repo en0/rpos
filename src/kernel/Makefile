@@ -90,7 +90,7 @@ disk :
 
 run : $(KERNEL)
 	@echo NOTICE: Profile is $(PROFILE)
-	@$(QEMU) -serial stdio -kernel $<
+	@$(QEMU) -kernel $<
 
 
 .PHONY : debug
@@ -101,7 +101,7 @@ debug : $(KERNEL)
 	@echo Example with GDB:
 	@echo \ target remote localhost:1234
 	@echo \ symbol-file $<
-	@$(QEMU) -serial stdio -s -S -kernel $<
+	@$(QEMU) -s -S -kernel $<
 
 
 ## INFO

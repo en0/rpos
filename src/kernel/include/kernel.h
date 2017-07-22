@@ -31,15 +31,16 @@ extern void* _ekernel;
 /* Provided by arch/start.s */
 extern void kabort(const char*);
 
-#define MMAP_KERNEL    ((void*)&_kernel)
-#define MMAP_EKERNEL   ((void*)&_ekernel)
+#define PHYS_MMAP_KERNEL    ((void*)&_kernel - 0xc0000000)
+#define PHYS_MMAP_EKERNEL   ((void*)&_ekernel - 0xC0000000)
 
 #define MMAP_PGPDE     ((void*)0xFFFFF000)
 #define MMAP_PGPTE     ((void*)0xFFC00000)
 #define MMAP_PMEM      ((void*)0xFFBE0000)
 #define MMAP_STACK     ((void*)0xFF3E0000)
-#define MMAP_HEAP      ((void*)&_ekernel)
 //#define MMAP_HEAP      ((void*)0xC0400000)
+#define MMAP_HEAP      ((void*)&_ekernel)
+#define MMAP_KERNEL    ((void*)&_kernel)
 
 #define MMAP_USR_STACK ((void*)0xBFFFFFFF)
 #define MMAP_USR_MAPS  ((void*)0x40000000)
