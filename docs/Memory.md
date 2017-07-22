@@ -1,3 +1,5 @@
+[<< Back](index.md)
+
 # Memory Management Planning
 
 I want this kernel to live in the Higher Half (3G range) of virtual memory. To
