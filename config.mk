@@ -32,7 +32,8 @@ SUBDIRS = src/kernel
 
 # Some Utilities
 GENCONFIG=$(TOP)/scripts/genconfig.py
-QEMU=qemu-system-x86_64 -m 10
+QEMU=qemu-system-x86_64 -m 10 -serial stdio
+#QEMU=qemu-system-x86_64 -m 10 -serial stdio -initrd ../../ramdisk
 
 ## END REGION: GLOBAL
 
@@ -46,7 +47,7 @@ K_AS=i686-elf-as
 K_AR=i686-elf-ar
 
 # FLAGS
-K_CFLAGS = -ffreestanding -O2 -Wall -nostdlib -fno-stack-protector -fno-omit-frame-pointer
+K_CFLAGS = -ffreestanding -O0 -Wall -nostdlib -fno-stack-protector -fno-omit-frame-pointer
 K_ASFLAGS=
 K_LDFLAGS=
 
