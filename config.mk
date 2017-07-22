@@ -28,12 +28,12 @@ STACK_SIZE = (4096*4)
 TOP := $(dir $(CURDIR)/$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST)))
 
 # Top Level Build targets
-SUBDIRS = src/kernel
+SUBDIRS = src/kernel ramdisk
 
 # Some Utilities
 GENCONFIG=$(TOP)/scripts/genconfig.py
 QEMU=qemu-system-x86_64 -m 10 -serial stdio
-#QEMU=qemu-system-x86_64 -m 10 -serial stdio -initrd ../../ramdisk
+#QEMU=qemu-system-x86_64 -m 10 -serial stdio -initrd ../../ramdisk/initrd.img
 
 ## END REGION: GLOBAL
 
