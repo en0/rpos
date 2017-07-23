@@ -20,13 +20,13 @@ possible.
 - [x] RTC via PIT Channel 0
 - [x] Setup physical memory manager
 - [x] Setup Virtual memory manager
-- [ ] 8MB Stack just under the kernel in the virtual address space.
+- [x] 8MB Stack just under the kernel in the virtual address space.
 - [ ] Kernel will pull from it's own small heap at 0xC0400000
 
 ## Round 1 Feature Set
 
 - [ ] Kernel will not support multi-tasking but it will so plan on it.
-- [ ] Kernel will use an in memory ramdisk loaded as a modual.
+- [x] Kernel will use an in memory ramdisk loaded as a modual.
 - [x] Kernel will use multiboot loader (grub or other existing solution).
 - [ ] SYSENTER will be facilitated by NEWLIB but some functions will be stubbed.
 - [ ] No real driver system. Keyboard and 0x000b8000 video memory are the only requirements.
