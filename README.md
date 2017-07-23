@@ -19,7 +19,7 @@ possible.
 - [x] Coredump on FAULT/TRAP
 - [x] RTC via PIT Channel 0
 - [x] Setup physical memory manager
-- [ ] Setup Virtual memory manager
+- [x] Setup Virtual memory manager
 - [ ] 8MB Stack just under the kernel in the virtual address space.
 - [ ] Kernel will pull from it's own small heap at 0xC0400000
 
