@@ -32,8 +32,8 @@ SUBDIRS = src/kernel ramdisk
 
 # Some Utilities
 GENCONFIG=$(TOP)/scripts/genconfig.py
-QEMU=qemu-system-x86_64 -m 128 -serial stdio
-#QEMU=qemu-system-x86_64 -m 10 -serial stdio -initrd ../../ramdisk/initrd.img
+#QEMU=qemu-system-x86_64 -m 128 -serial stdio
+QEMU=qemu-system-x86_64 -m 128 -serial stdio -initrd ../../ramdisk/initrd.img
 
 ## END REGION: GLOBAL
 

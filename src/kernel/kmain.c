@@ -36,16 +36,11 @@ void main(multiboot_info_t* bootinfo) {
             "                   _/    _/  _/          _/_/    _/_/_/         ");
     for(i = 0; i < 80; i++, kputchar('='));
                                              
-  
     kprintf("[-] Kernel starts at %p\n", VIRT_ADDR_KSTART);
     kprintf("[-] Kernel ends at %p\n", VIRT_ADDR_KEND);
-    kprintf("[-] Kernel space size is %i KB\n", KERNEL_SIZE / 1024);
-    kprintf("[-] PDE starts at %p\n", VIRT_ADDR_PGPDE);
-    kprintf("[-] PTE starts at %p\n", VIRT_ADDR_PGPTE);
-    kprintf("[-] Kernel stack starts at %p\n", VIRT_ADDR_STACK);
-    kprintf("[-] 8MB of stack space!\n");
-
-    kprintf("\n[!] TODO: You need to lock memory for the modules loaded by grub\n");
+    kprintf("[-] Kernel size is %i KB\n", KERNEL_SIZE / 1024);
+    kprintf("[-] Ramdisk at %p\n", VIRT_ADDR_RAMDISK);
+    kprintf("[-] Kernel stack at %p (8MB)\n", VIRT_ADDR_STACK);
 
     //for(i = 3; i > -1; i--)
         //kprintf("100 / %i = %i\n", i, 100/i);

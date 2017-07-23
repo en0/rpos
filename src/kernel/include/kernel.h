@@ -44,6 +44,7 @@ extern void kabort(const char*);
 #define VIRT_ADDR_STACK     ((void*)0xFFBFFFFF)
 #define VIRT_ADDR_ESTACK    ((void*)0xFF400000)
 #define VIRT_ADDR_HEAP      ((void*)0xC0400000)
+#define VIRT_ADDR_RAMDISK   ((void*)((uint32_t)(&_ekernel + 0x1000) & 0xFFFFF000))
 #define VIRT_ADDR_KEND      ((void*)&_ekernel)
 #define VIRT_ADDR_KSTART    ((void*)&_kernel)
 #define VIRT_ADDR_VGA3      ((void*)0xc00B8000)

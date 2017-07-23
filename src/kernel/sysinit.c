@@ -107,17 +107,36 @@ void init_pmem(multiboot_info_t* mbi) {
 
     // Lock the first page. it just messes up NULL checking
     pmem_lock_region(0x00, 1);
+
+    // Lock the modules info structure and ramdisk module.
+    multiboot_module_t *ramdisk_info = (multiboot_module_t *)mbi->mods_addr;
+    pmem_lock_region(
+        (void*)mbi->mods_addr,
+        sizeof(uint32_t));
+    pmem_lock_region(
+        (void*)ramdisk_info->mod_start,
+        ramdisk_info->mod_end - ramdisk_info->mod_start );
 }
 
 void init_vmem(multiboot_info_t* mbi) {
 
     initVMEM();
 
+    // Map kernel memory.
     vmem_map_region(
         PHYS_ADDR_KSTART,
         KERNEL_SIZE,
         VIRT_ADDR_KSTART,
         VMEM_FLG_WRITABLE
+    );
+
+    // Map the ramdisk into the virtual address space.
+    multiboot_module_t *ramdisk_info = (multiboot_module_t *)mbi->mods_addr;
+    vmem_map_region(
+        (void*)ramdisk_info->mod_start,
+        ramdisk_info->mod_end - ramdisk_info->mod_start,
+        VIRT_ADDR_RAMDISK,
+        0x00 // Read only
     );
 
     vmem_enable();
