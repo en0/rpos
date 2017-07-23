@@ -23,6 +23,8 @@
 #include <multiboot.h>
 #include <cpu.h>
 #include <pmem.h>
+#include <vmem.h>
+#include <kprint.h>
 
 extern void initGDT();
 extern void initIDT();
@@ -86,6 +88,8 @@ void validate_boot_env(multiboot_info_t* mbi) {
 
 void init_pmem(multiboot_info_t* mbi) {
 
+    initPMEM();
+
     multiboot_memory_map_t *mmap;
 
     // Free the memory that the bootloader says is physicly available.
@@ -99,29 +103,65 @@ void init_pmem(multiboot_info_t* mbi) {
     }
 
     // Lock kernel memory, the memory map, and the stack region
-    pmem_lock_region(PHYS_MMAP_KERNEL, (PHYS_MMAP_EKERNEL - PHYS_MMAP_KERNEL));
+    pmem_lock_region(PHYS_ADDR_KSTART, KERNEL_SIZE);
 
     // Lock the first page. it just messes up NULL checking
-    pmem_lock_region(0x00, 4096);
+    pmem_lock_region(0x00, 1);
+}
+
+void init_vmem(multiboot_info_t* mbi) {
+
+    initVMEM();
+
+    vmem_map_region(
+        PHYS_ADDR_KSTART,
+        KERNEL_SIZE,
+        VIRT_ADDR_KSTART,
+        VMEM_FLG_WRITABLE
+    );
+
+    vmem_enable();
+}
+
+void init_video() {
+
+    initKPRINT(VIRT_ADDR_VGA3);
+
+    pmem_lock_region(PHYS_ADDR_VGA3, 1);
+
+    vmem_map_region(
+        PHYS_ADDR_VGA3,
+        4096,
+        VIRT_ADDR_VGA3,
+        VMEM_FLG_WRITABLE
+    );
+}
+
+void init_stack() {
+    // You cannot install the new stack from here but you can
+    // allocate the space and map the addresses
 }
 
 void system_init(multiboot_info_t* mbi) {
 
     validate_boot_env(mbi);
 
-    initGDT();
-    initIDT();
-
 #ifdef PROFILE_DEBUG
     initDBG();
 #endif
 
+    init_pmem(mbi);
+    init_vmem(mbi);
+    init_stack();
+    init_video();
+
+    initGDT();
+    initIDT();
     initIRQ();
     initFAULT();
-    initRTC();
-    initPMEM();
 
-    init_pmem(mbi);
+    initRTC();
+
     sti();
 
 }

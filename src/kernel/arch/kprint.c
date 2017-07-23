@@ -52,7 +52,7 @@ void _scroll() {
 
     if (_cursor >= SCREEN_MAX_CURSOR) {
 
-        v = (char*)VIDEO_MEMORY;
+        v = (char*)_video_memory;
 
         for(i = 0; i < SCREEN_HEIGHT-1; i++, v+=SCREEN_REAL_WIDTH)
             memcpy(v, v+SCREEN_REAL_WIDTH, SCREEN_REAL_WIDTH);
@@ -63,6 +63,10 @@ void _scroll() {
 
         _cursor = SCREEN_LAST_LINE_HOME;
     }
+}
+
+void initKPRINT(void* video_memory) {
+    _video_memory = video_memory;
 }
 
 void kclear() {

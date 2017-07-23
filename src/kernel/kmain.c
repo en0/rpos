@@ -38,11 +38,14 @@ void main(multiboot_info_t* bootinfo) {
     for(i = 0; i < 80; i++, kputchar('='));
                                              
   
-    kprintf("[!] TODO: You need to lock memory for the modules loaded by grub\n", MMAP_KERNEL);
-    kprintf("[-] Kernel starts at %p\n", MMAP_KERNEL);
-    kprintf("[-] Kernel ends at %p\n", MMAP_HEAP);
-    kprintf("[-] Kernel space size is %i KB\n", (MMAP_HEAP - MMAP_KERNEL) / 1024);
-    kprintf("[-] LDR Page Table is at %p\n", &LDRPDT);
+    kprintf("[-] Kernel starts at %p\n", VIRT_ADDR_KSTART);
+    kprintf("[-] Kernel ends at %p\n", VIRT_ADDR_KEND);
+    kprintf("[-] Kernel space size is %i KB\n", KERNEL_SIZE / 1024);
+    kprintf("[-] PDE starts at %p\n", VIRT_ADDR_PGPDE);
+    kprintf("[-] PTE starts at %p\n", VIRT_ADDR_PGPTE);
+    kprintf("[-] Kernel stack starts at %p\n", VIRT_ADDR_STACK);
+
+    kprintf("\n[!] TODO: You need to lock memory for the modules loaded by grub\n");
 
     /* Cause a divide by zero fault
     for(i = 3; i > -1; i--)
