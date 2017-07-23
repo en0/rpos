@@ -111,7 +111,9 @@ void _vmem_map_address_ident(phys_addr *p, virt_addr *v, uint16_t flags) {
 
 void vmem_map_address(phys_addr *p, virt_addr *v, uint16_t flags) {
 
+#ifdef PROFILE_DEBUG
     dbg_printf("Mapping %p => %p\n", v, p);
+#endif
 
     if(!_vmap_enabled)
         return _vmem_map_address_ident(p, v, flags);
