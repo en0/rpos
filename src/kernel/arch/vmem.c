@@ -31,8 +31,6 @@ bool _vmap_enabled;
 
 #define FLAG(v,f) ((v&f)==f)
 
-void vmem_map_address(phys_addr *p, virt_addr *v, uint16_t flags);
-
 void printPDE(virt_addr *v) {
     
 #ifdef PROFILE_DEBUG
@@ -111,6 +109,9 @@ void _vmem_map_address_ident(phys_addr *p, virt_addr *v, uint16_t flags) {
 
 void vmem_map_address(phys_addr *p, virt_addr *v, uint16_t flags) {
 
+    if(p == NULL)
+        p = pmem_alloc();
+
 #ifdef PROFILE_DEBUG
     dbg_printf("Mapping %p => %p\n", v, p);
 #endif
@@ -127,7 +128,8 @@ void vmem_map_region(phys_addr *p, size_t len, virt_addr *v, uint16_t flags) {
         va = (uint32_t)v & 0xFFFFF000; 
         pa < ((uint32_t)p+len); 
         pa+=0x1000, va+=0x1000)
-        vmem_map_address((void*)pa, (void*)va, flags);
+        if(p==NULL) vmem_map_address(NULL, (void*)va, flags);
+        else vmem_map_address((void*)pa, (void*)va, flags);
 }
 
 void vmem_enable() {

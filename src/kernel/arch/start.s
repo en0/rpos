@@ -20,12 +20,9 @@
 
         .global _start
         .global kabort
-        .extern initIDT
-        .extern initGDT
-        .extern initDBG
+        .extern init_stack
         .extern kprintf
         .extern kclear
-
 
         .section .tstack, "aw", @nobits
 
@@ -55,6 +52,13 @@ _start: movl $stack, %esp       ## Setup temp stack
 .start: push %ebx               ## EBX points to multiboot_info_t
         call kclear             ## Clear the screen
         call system_init        ## Call system_init(mboot*)
+
+        call init_stack         ## Get the linear address of the new stack location
+
+        pop %ebx                ## move MBI to the new stack as an argument for main
+        mov %eax, %esp          ## Change stack location - 8MB of stack space.
+        push %ebx
+        sti                     ## Enable interrupts
         call main               ## Call main(mboot*)
 
         ## This should never happen

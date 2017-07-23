@@ -25,7 +25,6 @@
 #include <cpu.h>
 #include <pmem.h>
 
-extern void* LDRPDT;
 void main(multiboot_info_t* bootinfo) {
 
     int i = 0;
@@ -44,13 +43,12 @@ void main(multiboot_info_t* bootinfo) {
     kprintf("[-] PDE starts at %p\n", VIRT_ADDR_PGPDE);
     kprintf("[-] PTE starts at %p\n", VIRT_ADDR_PGPTE);
     kprintf("[-] Kernel stack starts at %p\n", VIRT_ADDR_STACK);
+    kprintf("[-] 8MB of stack space!\n");
 
     kprintf("\n[!] TODO: You need to lock memory for the modules loaded by grub\n");
 
-    /* Cause a divide by zero fault
-    for(i = 3; i > -1; i--)
-        kprintf("100 / %i = %i\n", i, 100/i);
-    */
+    //for(i = 3; i > -1; i--)
+        //kprintf("100 / %i = %i\n", i, 100/i);
 
     for(;;);
 }

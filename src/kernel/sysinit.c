@@ -137,9 +137,16 @@ void init_video() {
     );
 }
 
-void init_stack() {
-    // You cannot install the new stack from here but you can
-    // allocate the space and map the addresses
+uint32_t init_stack() {
+
+    /* This should be called from start.s although it is not required. What is
+     * required is that we change the stack pointer in the top frame (.start)
+     * to avoid needing to do a complicated relocation. */
+
+    uint32_t len = VIRT_ADDR_STACK - VIRT_ADDR_ESTACK;
+    vmem_map_region(NULL, len, VIRT_ADDR_ESTACK, VMEM_FLG_WRITABLE | VMEM_FLG_GLOBAL);
+
+    return (uint32_t)VIRT_ADDR_STACK;
 }
 
 void system_init(multiboot_info_t* mbi) {
@@ -152,7 +159,6 @@ void system_init(multiboot_info_t* mbi) {
 
     init_pmem(mbi);
     init_vmem(mbi);
-    init_stack();
     init_video();
 
     initGDT();
@@ -161,8 +167,5 @@ void system_init(multiboot_info_t* mbi) {
     initFAULT();
 
     initRTC();
-
-    sti();
-
 }
 
