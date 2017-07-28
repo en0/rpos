@@ -18,26 +18,20 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <config.h>
 #include <kernel.h>
 #include <boot/multiboot.h>
-#include <irq.h>
 #include <cpu.h>
 
+#include <irq/idt.h>
+#include <irq/irq.h>
+
+#include <mem/gdt.h>
 #include <mem/pmem.h>
 #include <mem/vmem.h>
 #include <mem/heap.h>
-#include <kprint.h>
 
-extern void initGDT();
-extern void initIDT();
-extern void initIRQ();
-extern void initFAULT();
-extern void initRTC();
-
-#ifdef PROFILE_DEBUG
-extern void initDBG();
-#endif
+#include <cpu/fault.h>
+#include <cpu/rtc.h>
 
 /**
  ** CHECK_FLAG is used to validate flags from 
@@ -45,7 +39,6 @@ extern void initDBG();
  **/
 
 #define CHECK_FLAG(a,b) ((a & b) == b)
-
 
 void validate_boot_env(multiboot_info_t* mbi) {
 
@@ -89,13 +82,11 @@ void validate_boot_env(multiboot_info_t* mbi) {
     }
 }
 
-void init_pmem(multiboot_info_t* mbi) {
-
-    initPMEM();
+void declare_physical_memory(multiboot_info_t* mbi) {
 
     multiboot_memory_map_t *mmap;
 
-    // Free the memory that the bootloader says is physicly available.
+    // Free the memory that the bootloader identified as available.
     for(mmap = (multiboot_memory_map_t *) mbi->mmap_addr;
         (unsigned long) mmap < mbi->mmap_addr + mbi->mmap_length;
         mmap = (multiboot_memory_map_t *) ((unsigned long) mmap + mmap->size + sizeof (mmap->size))) {
@@ -104,6 +95,9 @@ void init_pmem(multiboot_info_t* mbi) {
             pmem_free_region((void*)((uint32_t)mmap->addr), (uint32_t)mmap->len);
         }
     }
+}
+
+void lock_used_memory(multiboot_info_t* mbi) {
 
     // Lock kernel memory, the memory map, and the stack region
     pmem_lock_region(PHYS_ADDR_KSTART, KERNEL_SIZE);
@@ -111,21 +105,18 @@ void init_pmem(multiboot_info_t* mbi) {
     // Lock the first page. it just messes up NULL checking
     pmem_lock_region(0x00, 1);
 
+    // Lock video memory
+    pmem_lock_region(PHYS_ADDR_VGA3, 1);
+
     // Lock the modules info structure and ramdisk module.
     multiboot_module_t *ramdisk_info = (multiboot_module_t *)mbi->mods_addr;
-    pmem_lock_region(
-        (void*)mbi->mods_addr,
-        sizeof(uint32_t));
-    pmem_lock_region(
-        (void*)ramdisk_info->mod_start,
-        ramdisk_info->mod_end - ramdisk_info->mod_start );
+    pmem_lock_region((void*)mbi->mods_addr, sizeof(uint32_t));
+    pmem_lock_region((void*)ramdisk_info->mod_start, ramdisk_info->mod_end - ramdisk_info->mod_start);
 }
 
-void init_vmem(multiboot_info_t* mbi) {
+void map_used_memory(multiboot_info_t* mbi) {
 
-    initVMEM();
-
-    // Map kernel memory.
+    // Map the kernel memory
     vmem_map_region(
         PHYS_ADDR_KSTART,
         KERNEL_SIZE,
@@ -133,7 +124,7 @@ void init_vmem(multiboot_info_t* mbi) {
         VMEM_FLG_WRITABLE
     );
 
-    // Map the ramdisk into the virtual address space.
+    // Map the ramdisk
     multiboot_module_t *ramdisk_info = (multiboot_module_t *)mbi->mods_addr;
     vmem_map_region(
         (void*)ramdisk_info->mod_start,
@@ -142,61 +133,66 @@ void init_vmem(multiboot_info_t* mbi) {
         0x00 // Read only
     );
 
-    vmem_enable();
-}
-
-void init_heap() {
-    initHEAP(
-        VIRT_ADDR_HEAP,
-        VIRT_ADDR_EHEAP,
-        VMEM_FLG_WRITABLE );
-}
-
-void init_video() {
-
-    initKPRINT(VIRT_ADDR_VGA3);
-
-    pmem_lock_region(PHYS_ADDR_VGA3, 1);
-
+    // Map video memory
     vmem_map_region(
         PHYS_ADDR_VGA3,
         4096,
         VIRT_ADDR_VGA3,
         VMEM_FLG_WRITABLE
     );
+
+    // Map 8MB Stack Space
+    vmem_map_region(
+        NULL,  // Get new page frames.
+        (uint32_t)(VIRT_ADDR_STACK - VIRT_ADDR_ESTACK),
+        VIRT_ADDR_ESTACK, 
+        VMEM_FLG_WRITABLE
+    );
 }
 
-uint32_t init_stack() {
+void initialize_memory_management(multiboot_info_t *mbi) {
 
-    /* This should be called from start.s although it is not required. What is
-     * required is that we change the stack pointer in the top frame (.start)
-     * to avoid needing to do a complicated relocation. */
+    /*
+     * Setup a memory management system that will allow the kernel to allocate
+     * memory safely.
+     */
 
-    uint32_t len = VIRT_ADDR_STACK - VIRT_ADDR_ESTACK;
-    vmem_map_region(NULL, len, VIRT_ADDR_ESTACK, VMEM_FLG_WRITABLE | VMEM_FLG_GLOBAL);
+    // Install a flat GDT.
+    gdt_setup();
 
-    return (uint32_t)VIRT_ADDR_STACK;
+    // Setup physical frame allocation manager and lock used memory spaces.
+    pmem_setup();
+    declare_physical_memory(mbi);
+    lock_used_memory(mbi);
+
+    // Setup virtual memory manager and map used memory spaces.
+    vmem_setup();
+    map_used_memory(mbi);
+
+    // Enable the new memory map.
+    vmem_enable();
+
+    // Setup the heap manager
+    heap_create(VIRT_ADDR_HEAP, VIRT_ADDR_EHEAP, VMEM_FLG_WRITABLE);
+}
+
+void initialize_interrupt_core(multiboot_info_t* mbi) {
+    idt_setup();
+    irq_setup();
+}
+
+void initialize_peripherals() {
+    rtc_setup();
 }
 
 void system_init(multiboot_info_t* mbi) {
-
-    validate_boot_env(mbi);
-
 #ifdef PROFILE_DEBUG
-    initDBG();
+    dbg_setup();
 #endif
-
-    init_pmem(mbi);
-    init_vmem(mbi);
-    init_heap();
-    init_video();
-
-    initGDT();
-
-    initialize_interrupt_core();
-
-    initFAULT();
-
-    initRTC();
+    validate_boot_env(mbi);
+    initialize_memory_management(mbi);
+    initialize_interrupt_core(mbi);
+    initialize_peripherals();
+    fault_setup();
 }
 

@@ -19,14 +19,16 @@
  **/
 
 #include <stddef.h>
-#include <memory.h>
+#include <mem/pmem.h>
+#include <mem/vmem.h>
+#include <mem/heap.h>
 
 static inline void* _alloc_frame(void* addr, uint16_t flags) {
     vmem_map_address(NULL, addr, flags);
     return addr;
 }
 
-heap_info_t* initHEAP(void* start, void* end, uint16_t flags) {
+heap_info_t* heap_create(void* start, void* end, uint16_t flags) {
     heap_info_t *heap = (void*)_alloc_frame(start, flags);
     heap->high_water_mark = start + sizeof(heap_info_t) + 1;
     heap->flags = flags;
@@ -34,7 +36,7 @@ heap_info_t* initHEAP(void* start, void* end, uint16_t flags) {
     return heap;
 }
 
-void *kmalloc(heap_info_t *heap, size_t len) {
+void *heap_kmalloc(heap_info_t *heap, size_t len) {
 
     void *start  = heap->high_water_mark;
     void *end = start + len;

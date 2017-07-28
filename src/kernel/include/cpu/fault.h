@@ -18,12 +18,9 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#ifndef __MEMORY_H
-#define __MEMORY_H 1
+#ifndef __FAULT_H
+#define __FAULT_H 1
 
-#include <mem/gdt.h>
-#include <mem/pmem.h>
-#include <mem/vmem.h>
-#include <mem/heap.h>
+void fault_setup();
 
-#endif /** __MEMORY_H **/
+#endif /** __FAULT_H **/

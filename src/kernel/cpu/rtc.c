@@ -18,17 +18,16 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
+#include <kernel.h>
 #include <cpu.h>
 #include <irq.h>
-#include <kprint.h>
-#include <debug.h>
 
 uint32_t _seconds;
 uint16_t _ticks;
 
 void rtc_IRQHandler();
 
-void initRTC() {
+void rtc_setup() {
 
     /* 
      * Configure the PIT

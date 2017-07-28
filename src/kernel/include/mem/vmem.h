@@ -37,7 +37,7 @@
 typedef uint32_t phys_addr;
 typedef uint32_t virt_addr;
 
-void initVMEM();
+void vmem_setup();
 void vmem_map_address(phys_addr*, virt_addr*, uint16_t);
 void vmem_map_region(phys_addr*, size_t, virt_addr*, uint16_t);
 void vmem_enable();

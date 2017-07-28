@@ -16,7 +16,7 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-            .global initGDT
+            .global gdt_setup
 
             .section .data
 
@@ -52,7 +52,7 @@ gdt_info:   .2byte gdt_info - gdt_start - 1
             .section .text
             .align 4
 
-initGDT:    push %ebp
+gdt_setup:  push %ebp
             mov %esp, %ebp
             push %eax
 

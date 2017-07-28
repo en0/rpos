@@ -82,17 +82,5 @@ int kputs(const char* str);
 
 void kclear();
 
-
-/** Function: void initKPRINT(void*)
- ** Sets the location of video memory.
- **
- ** Arguments:
- **   A void pointer to the linear addess of video memory.
- **
- ** Returns:
- **   None */
-
-void initKPRINT(void*);
-
 #endif /* __KPRINTF */
 

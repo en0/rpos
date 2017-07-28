@@ -21,4 +21,6 @@
 #ifndef __GDT_H
 #define __GDT_H 1
 
+void gdt_setup();
+
 #endif /** __GDT_H **/

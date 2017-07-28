@@ -58,13 +58,13 @@ void pmem_lock_region(void* addr, uint32_t size);
 
 void pmem_free_region(void* addr, uint32_t size);
 
-/** void initPMEM(void* map_start, uint32_t size);     **
+/** void pmem_setup(void* map_start, uint32_t size);    **
  ** Initialize the physical memory manager              **
  ** Arguments:                                          **
  ** - map_start : physical address to start the map     **
  ** - size : The total size of memory in KB             **/
 
-void initPMEM();
+void pmem_setup();
 
 #endif /* __PMEM_H */
 

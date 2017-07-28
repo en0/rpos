@@ -18,11 +18,12 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <irq/idt.h>
-#include <irq/irq.h>
+#ifndef __RTC_H
+#define __RTC_H 1
 
-void initialize_interrupt_core() {
-    idt_setup();
-    irq_setup();
-}
+#include <stdint.h>
 
+void rtc_setup();
+uint32_t rtc_getTicks();
+
+#endif /** __RTC_H **/

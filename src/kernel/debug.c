@@ -19,20 +19,19 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <config.h>
+#include <string.h>
+#include <stdarg.h>
+#include <kernel.h>
+#include <cpu.h>
 
 #ifdef PROFILE_DEBUG
-
-#include <cpu.h>
-#include <stdarg.h>
-#include "string.h"
 
 #define COM1 0x3f8
 
 extern char* itoa(int value, char* str, int base);
 extern char* uitoa(int value, char* str, int base);
 
-void initDBG() {
+void dbg_setup() {
     outb(0x00, COM1+1);
     outb(0x80, COM1+3);
     outb(0x03, COM1+0);

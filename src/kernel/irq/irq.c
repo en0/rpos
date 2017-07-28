@@ -19,11 +19,10 @@
  **/
 
 #include <string.h>
+#include <kernel.h>
+#include <cpu.h>
 #include <irq/idt.h>
 #include <irq/irq.h>
-#include <cpu.h>
-
-#include <debug.h>
 
 #define woutb(a,b) outb(a,b); io_wait()
 

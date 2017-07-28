@@ -21,8 +21,6 @@
 # Project Settings
 PROJNAME = RPOS
 PROFILE = DEBUG
-STACK_SIZE = (4096*4)
-
 
 # Project root path
 TOP := $(dir $(CURDIR)/$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST)))

@@ -100,7 +100,7 @@ void _free_page(uint32_t page) {
 
 /** Public Functions **/
 
-void initPMEM() {
+void pmem_setup() {
 
     _map_start_page = TO_PAGE(_map);
     _map_end_page = TO_PAGE(_map + MAP_BYTES);

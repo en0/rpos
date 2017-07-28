@@ -18,14 +18,10 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <kernel.h>
-#include <boot/multiboot.h>
-#include <kprint.h>
 #include <string.h>
-#include <cpu.h>
-#include <mem/heap.h>
+#include <kernel.h>
 
-void main(multiboot_info_t* bootinfo) {
+void main() {
 
     int i = 0;
     for(i = 0; i < 80; i++, kputchar('='));
@@ -43,8 +39,10 @@ void main(multiboot_info_t* bootinfo) {
     kprintf("[-] Kernel stack at %p (8MB)\n", VIRT_ADDR_STACK);
     kprintf("[-] Heap located at %p\n", VIRT_ADDR_HEAP);
 
-    //for(i = 3; i > -1; i--)
-        //kprintf("100 / %i = %i\n", i, 100/i);
+    /*
+    for(i = 3; i > -1; i--)
+        kprintf("100 / %i = %i\n", i, 100/i);
+    */
 
     for(;;);
 }

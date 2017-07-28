@@ -21,9 +21,12 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H 1
 
-#define STACK_SIZE @STACK_SIZE
+#include <stddef.h>
+#include <stdint.h>
 
 #define PROJNAME "@PROJNAME"
 #define PROFILE_@PROFILE 1
+
+#include <memoryspace.h>
 
 #endif /** __CONFIG_H **/

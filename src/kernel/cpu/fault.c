@@ -24,11 +24,10 @@
  **/
 
 
+#include <string.h>
+#include <kernel.h>
 #include <cpu.h>
 #include <irq/idt.h>
-#include <string.h>
-#include <kprint.h>
-#include <debug.h>
 
 const char *exception_messages[] = {
     "Division By Zero",
@@ -88,7 +87,7 @@ extern void fault_stub19(void);
 extern void fault_stub20(void);
 extern void fault_stub30(void);
 
-void initFAULT() {
+void fault_setup() {
     idt_setGate(0x00, &fault_stub0, IDT_FLG_PRESENT | IDT_FLG_DPL0 | IDT_FLG_INTEGATE);
     idt_setGate(0x01, &fault_stub1, IDT_FLG_PRESENT | IDT_FLG_DPL0 | IDT_FLG_INTEGATE);
     idt_setGate(0x02, &fault_stub2, IDT_FLG_PRESENT | IDT_FLG_DPL0 | IDT_FLG_INTEGATE);

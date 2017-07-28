@@ -18,8 +18,8 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <stdint.h>
 #include <config.h>
+#include <stdint.h>
 
 #ifndef __DEBUG_H
 #define __DEBUG_H 1
@@ -75,9 +75,16 @@ int dbg_putchar(int character);
 
 int dbg_puts(const char* str);
 
-/** Setup the hardware to use for writing.  */
+/** Function: void dbg_setup()
+ ** Setup COM1 for debug logging output.
+ ** 
+ ** Arguments:
+ **   None
+ **
+ ** Retuns:
+ **   None  */
 
-void initDEBUG();
+void dbg_setup();
 
 #endif /** PROFILE_DEBUG **/
 

@@ -18,11 +18,11 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
+#include <string.h>
 #include <stdbool.h>
 #include <kernel.h>
-#include <string.h>
-#include <debug.h>
-#include <memory.h>
+#include <mem/pmem.h>
+#include <mem/vmem.h>
 
 uint32_t* _vmap_dir;
 uint32_t* _vmap_tbl = VIRT_ADDR_PGPTE;
@@ -77,7 +77,7 @@ void printPDE(virt_addr *v) {
 
 }
 
-void initVMEM() {
+void vmem_setup() {
 
     // VMAP is not yet in use.
     _vmap_enabled = false;

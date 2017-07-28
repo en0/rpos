@@ -18,13 +18,14 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <kprint.h>
+#include <string.h>
 #include <stdarg.h>
 #include <stdbool.h>
-#include <string.h>
+#include <kernel.h>
 
-#define VIDEO_MEMORY 0xB8000
-#define VIDEO_COLOR 0x04 // Red on black
+#define VIDEO_MEMORY VIRT_ADDR_VGA3
+#define VIDEO_COLOR 0x04 // Red on black - Easy to read
+//#define VIDEO_COLOR 0x80 // black on gray
 #define TAB_WIDTH 4
 #define SCREEN_WIDTH 80
 #define SCREEN_HEIGHT 25
@@ -64,10 +65,6 @@ void _scroll() {
 
         _cursor = SCREEN_LAST_LINE_HOME;
     }
-}
-
-void initKPRINT(void* video_memory) {
-    _video_memory = video_memory;
 }
 
 void kclear() {

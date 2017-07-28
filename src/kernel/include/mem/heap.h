@@ -30,7 +30,7 @@ typedef struct heap_info {
 } heap_info_t;
 
 
-/* initHEAP(start, end, flags) : Setup a new heap
+/* heap_create(start, end, flags) : Setup a new heap
  *
  * Creates a heap that allows access to a virtual memory space.
  *
@@ -39,21 +39,21 @@ typedef struct heap_info {
  * - end: The last address of the virtual address space
  * - flags: The paging attribute flags assigned when new pages are allocated.*/
 
-heap_info_t* initHEAP(void* start, void* end, uint16_t flags);
+heap_info_t* heap_create(void* start, void* end, uint16_t flags);
 
 
-/* void* kmalloc(HEAP, LEN) - Allocate space on the heap.
+/* void* heap_kmalloc(HEAP, LEN) - Allocate space on the heap.
  *
  * Allocates physical memory and assigns it to an available address range in
  * the heap.
  *
  * Example Call:
- * uint32_t* array = kmalloc(VIRT_ADDR_HEAP, sizeof(uint32_t) * array_size);
+ * uint32_t* array = heap_kmalloc(VIRT_ADDR_HEAP, sizeof(uint32_t) * array_size);
  *
  * Arguments:
  * - heap: A pointer to the heap_info structure that defines the limits
  * - len: The count of bytes to allocate.  */
 
-void* kmalloc(heap_info_t* heap, size_t len);
+void* heap_kmalloc(heap_info_t* heap, size_t len);
 
 #endif /* __HEAP_H */
