@@ -21,8 +21,9 @@
 #ifndef __IRQ_H
 #define __IRQ_H 1
 
-#include <irq/irq.h>
+#include <cpu/core.h>
 
 void initialize_interrupt_core();
+void install_irq_handler(int, void(*)(regs_t*));
 
 #endif /** __IRQ_H **/

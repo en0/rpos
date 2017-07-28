@@ -21,9 +21,6 @@
 #include <irq/idt.h>
 #include <irq/irq.h>
 
-extern void idt_setup(void);
-extern void irq_setup(void);
-
 void initialize_interrupt_core() {
     idt_setup();
     irq_setup();

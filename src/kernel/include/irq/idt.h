@@ -32,7 +32,7 @@
 #define IDT_FLG_INTEGATE 0x0E00
 #define IDT_FLG_TRAPGATE 0x0F00
 
-void initIDT();
+void idt_setup();
 void idt_setGate(uint32_t, void(*)(), uint32_t);
 
 #endif /* __IDT_H */
