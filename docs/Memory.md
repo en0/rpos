@@ -106,4 +106,16 @@ where the application should be linked to.
 
 ---
 
+# Thinking about heap management
+
+I think for this first go at things, we will just use a high water mark.
+
+## HighWaterMark Heap Allocation
+
+The up sides.
+
+- Cannot free memory.
+- Can allocate chunks of any size.
+- Very simple implementation.
+
 [<< Back](README.md)
