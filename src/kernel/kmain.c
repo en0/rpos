@@ -23,7 +23,7 @@
 #include <kprint.h>
 #include <string.h>
 #include <cpu.h>
-#include <pmem.h>
+#include <heap.h>
 
 void main(multiboot_info_t* bootinfo) {
 
@@ -41,6 +41,7 @@ void main(multiboot_info_t* bootinfo) {
     kprintf("[-] Kernel size is %i KB\n", KERNEL_SIZE / 1024);
     kprintf("[-] Ramdisk at %p\n", VIRT_ADDR_RAMDISK);
     kprintf("[-] Kernel stack at %p (8MB)\n", VIRT_ADDR_STACK);
+    kprintf("[-] Heap located at %p\n", VIRT_ADDR_HEAP);
 
     //for(i = 3; i > -1; i--)
         //kprintf("100 / %i = %i\n", i, 100/i);

@@ -25,6 +25,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#define TOPAGE(a) (void*)((uint32_t)a & 0xFFFFF000)
+
 /** void* pmem_alloc();                                 **
  ** allocate a 4Kb page                                 **/
 

@@ -24,6 +24,7 @@
 #include <cpu.h>
 #include <pmem.h>
 #include <vmem.h>
+#include <heap.h>
 #include <kprint.h>
 
 extern void initGDT();
@@ -142,6 +143,13 @@ void init_vmem(multiboot_info_t* mbi) {
     vmem_enable();
 }
 
+void init_heap() {
+    initHEAP(
+        VIRT_ADDR_HEAP,
+        VIRT_ADDR_EHEAP,
+        VMEM_FLG_WRITABLE );
+}
+
 void init_video() {
 
     initKPRINT(VIRT_ADDR_VGA3);
@@ -178,6 +186,7 @@ void system_init(multiboot_info_t* mbi) {
 
     init_pmem(mbi);
     init_vmem(mbi);
+    init_heap();
     init_video();
 
     initGDT();

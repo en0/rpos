@@ -24,6 +24,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <heap.h>
 
 /* Provided by linker */
 extern void* _kernel;
@@ -43,6 +44,7 @@ extern void kabort(const char*);
 #define VIRT_ADDR_PGPTE     ((void*)0xFFC00000)
 #define VIRT_ADDR_STACK     ((void*)0xFFBFFFFF)
 #define VIRT_ADDR_ESTACK    ((void*)0xFF400000)
+#define VIRT_ADDR_EHEAP     ((void*)0xFF3FFFFF)
 #define VIRT_ADDR_HEAP      ((void*)0xC0400000)
 #define VIRT_ADDR_RAMDISK   ((void*)((uint32_t)(&_ekernel + 0x1000) & 0xFFFFF000))
 #define VIRT_ADDR_KEND      ((void*)&_ekernel)
@@ -54,5 +56,6 @@ extern void kabort(const char*);
 #define VIRT_ADDR_USR_TEXT  ((void*)0x08048000)
 
 #define KERNEL_SIZE         ((size_t)(PHYS_ADDR_KEND - PHYS_ADDR_KSTART))
+#define KERNEL_HEAP         ((heap_info_t *)VIRT_ADDR_HEAP)
 #endif /* __KERNEL_H */
 
