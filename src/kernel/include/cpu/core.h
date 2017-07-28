@@ -18,10 +18,25 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#ifndef __CPU_H
-#define __CPU_H 1
+#ifndef __CORE_H
+#define __CORE_H 1
 
-#include <cpu/core.h>
-#include <cpu/io.h>
+#include <stdint.h>
 
-#endif /** __CPU_H **/
+typedef struct regs {
+    uint32_t gs, fs, es, ds;
+    uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax;
+    uint32_t int_no, err_code;
+    uint32_t eip, cs, eflags, useresp, ss;
+} regs_t;
+
+
+static inline void sti() {
+    asm volatile ("sti");
+}
+
+static inline void halt() {
+    for(;;) asm volatile ("hlt");
+}
+
+#endif /** __CORE_H **/

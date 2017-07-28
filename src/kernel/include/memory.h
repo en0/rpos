@@ -18,10 +18,12 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#ifndef __CPU_H
-#define __CPU_H 1
+#ifndef __MEMORY_H
+#define __MEMORY_H 1
 
-#include <cpu/core.h>
-#include <cpu/io.h>
+#include <mem/gdt.h>
+#include <mem/pmem.h>
+#include <mem/vmem.h>
+#include <mem/heap.h>
 
-#endif /** __CPU_H **/
+#endif /** __MEMORY_H **/

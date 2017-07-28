@@ -19,11 +19,11 @@
  **/
 
 #include <kernel.h>
-#include <multiboot.h>
+#include <boot/multiboot.h>
 #include <kprint.h>
 #include <string.h>
 #include <cpu.h>
-#include <heap.h>
+#include <mem/heap.h>
 
 void main(multiboot_info_t* bootinfo) {
 

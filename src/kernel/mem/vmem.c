@@ -22,8 +22,8 @@
 #include <string.h>
 #include <kprint.h>
 #include <debug.h>
-#include <pmem.h>
-#include <vmem.h>
+#include <mem/pmem.h>
+#include <mem/vmem.h>
 
 uint32_t* _vmap_dir;
 uint32_t* _vmap_tbl = VIRT_ADDR_PGPTE;

@@ -20,11 +20,11 @@
 
 #include <config.h>
 #include <kernel.h>
-#include <multiboot.h>
+#include <boot/multiboot.h>
 #include <cpu.h>
-#include <pmem.h>
-#include <vmem.h>
-#include <heap.h>
+#include <mem/pmem.h>
+#include <mem/vmem.h>
+#include <mem/heap.h>
 #include <kprint.h>
 
 extern void initGDT();

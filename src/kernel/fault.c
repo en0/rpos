@@ -25,6 +25,7 @@
 
 
 #include <cpu.h>
+#include <irq/idt.h>
 #include <string.h>
 #include <kprint.h>
 #include <debug.h>

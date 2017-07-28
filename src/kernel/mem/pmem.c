@@ -19,7 +19,7 @@
  **/
 
 #include <string.h>
-#include <pmem.h>
+#include <mem/pmem.h>
 
 /**
  ** Physical Memory Manager

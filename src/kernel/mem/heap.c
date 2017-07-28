@@ -18,9 +18,9 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <heap.h>
-#include <vmem.h>
-#include <pmem.h>
+#include <mem/heap.h>
+#include <mem/vmem.h>
+#include <mem/pmem.h>
 
 static inline void* _alloc_frame(void* addr, uint16_t flags) {
     vmem_map_address(NULL, addr, flags);
