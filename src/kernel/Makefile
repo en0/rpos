@@ -20,13 +20,19 @@ MAKE_CONFIG=../../config.mk
 
 include $(MAKE_CONFIG)
 
-ARCH_PATH := arch
-LIB_PATH := lib
-LIB_PATH_ARCH := $(LIB_PATH)/arch
+#ARCH_PATH := arch
+#LIB_PATH := lib
+#LIB_PATH_ARCH := $(LIB_PATH)/arch
 KERNEL=x86-elf-kernel
 
-OBJS=$(patsubst %.c, %.c.o, $(wildcard *.c) $(wildcard $(ARCH_PATH)/*.c) $(wildcard $(LIB_PATH)/*.c) $(wildcard $(LIB_PATH_ARCH)/*.c)) \
-     $(patsubst %.s, %.s.o, $(wildcard *.s) $(wildcard $(ARCH_PATH)/*.s) $(wildcard $(LIB_PATH)/*.s) $(wildcard $(LIB_PATH_ARCH)/*.s))
+#OBJS=$(patsubst %.c, %.c.o, $(wildcard *.c) $(wildcard $(ARCH_PATH)/*.c) $(wildcard $(LIB_PATH)/*.c) $(wildcard $(LIB_PATH_ARCH)/*.c)) \
+#     $(patsubst %.s, %.s.o, $(wildcard *.s) $(wildcard $(ARCH_PATH)/*.s) $(wildcard $(LIB_PATH)/*.s) $(wildcard $(LIB_PATH_ARCH)/*.s))
+
+CFILES=$(shell find . -type f -name '*.c')
+SFILES=$(shell find . -type f -name '*.s')
+
+OBJS=$(patsubst %.c, %.c.o, CFILES) \
+     $(patsubst %.s, %.s.o, SFILES)
 
 CONFIG_H=$(patsubst include/%.h.in, include/%.h, $(wildcard include/*.h.in))
 
