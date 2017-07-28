@@ -20,19 +20,10 @@ MAKE_CONFIG=../../config.mk
 
 include $(MAKE_CONFIG)
 
-#ARCH_PATH := arch
-#LIB_PATH := lib
-#LIB_PATH_ARCH := $(LIB_PATH)/arch
 KERNEL=x86-elf-kernel
 
-#OBJS=$(patsubst %.c, %.c.o, $(wildcard *.c) $(wildcard $(ARCH_PATH)/*.c) $(wildcard $(LIB_PATH)/*.c) $(wildcard $(LIB_PATH_ARCH)/*.c)) \
-#     $(patsubst %.s, %.s.o, $(wildcard *.s) $(wildcard $(ARCH_PATH)/*.s) $(wildcard $(LIB_PATH)/*.s) $(wildcard $(LIB_PATH_ARCH)/*.s))
-
-CFILES=$(shell find . -type f -name '*.c')
-SFILES=$(shell find . -type f -name '*.s')
-
-OBJS=$(patsubst %.c, %.c.o, CFILES) \
-     $(patsubst %.s, %.s.o, SFILES)
+OBJS=$(patsubst %.c, %.c.o, $(shell find . -type f -name '*.c')) \
+     $(patsubst %.s, %.s.o, $(shell find . -type f -name '*.s'))
 
 CONFIG_H=$(patsubst include/%.h.in, include/%.h, $(wildcard include/*.h.in))
 
@@ -55,7 +46,7 @@ $(KERNEL) : $(OBJS)
 # Generic Build Targets:
 %.c.o : %.c
 	@echo \ - CC $@
-	@$(K_CC) $(K_CFLAGS) -Iinclude -I$(ARCH_PATH)/include -o $@ -c $<
+	@$(K_CC) $(K_CFLAGS) -Iinclude -o $@ -c $<
 
 %.s.o : %.s
 	@echo \ - AS $@
@@ -73,7 +64,7 @@ $(OBJS) : $(CONFIG_H)
 
 CLEAN_OBJS=$(OBJS:%=clean-%) $(KERNEL:%=clean-%) $(CONFIG_H:%=clean-%)
 
-.PHONY : clean clean-notice $(CLEAN_OBJS)
+.PHONY : clean $(CLEAN_OBJS)
 
 clean : $(CLEAN_OBJS)
 
@@ -119,7 +110,7 @@ info :
 	@echo Build configuration information.
 	@echo ""
 	@echo Build Objects \"\($(PROFILE)\)\":
-	@echo $(OBJS) | xargs -n1 | sed s/^/\ -\ /
+	@echo $(OBJS) | xargs -n1 | sed s/^/\ -\ / | sort
 	@echo ""
 	@echo Configuration Headers.
 	@echo $(CONFIG_H) | xargs -n1 | sed s/^/\ -\ /
