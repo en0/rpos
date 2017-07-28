@@ -19,6 +19,7 @@
  **/
 
 #include <cpu.h>
+#include <irq.h>
 #include <kprint.h>
 #include <debug.h>
 
@@ -26,7 +27,6 @@ uint32_t _seconds;
 uint16_t _ticks;
 
 void rtc_IRQHandler();
-extern void irq_installHandler(int irq, void(*fn)(uint32_t));
 
 void initRTC() {
 
@@ -44,7 +44,7 @@ void initRTC() {
     _ticks = _seconds = 0;
 
     // Install IRQ Hander
-    irq_installHandler(0, &rtc_IRQHandler);
+    install_irq_handler(0, &rtc_IRQHandler);
 }
 
 uint32_t rtc_getTicks() {

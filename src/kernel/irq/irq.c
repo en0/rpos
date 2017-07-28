@@ -62,37 +62,37 @@ extern void irq_stub13(void);
 extern void irq_stub14(void);
 extern void irq_stub15(void);
 
-void pic_remap(uint32_t, uint32_t);
-void irq_disable(uint32_t);
-void irq_enable(uint32_t);
+void remap_pic(uint32_t, uint32_t);
+void disable_interrupt(uint32_t);
+void enable_interrupt(uint32_t);
 
 void(*_vectors[16])(regs_t*);
 
-void initIRQ() {
+void irq_setup() {
 
     // Remap PIC0 to 0x20-0x27 and PIC1 to 0x28-0x2F
-    pic_remap(0x20, 0x28);
+    remap_pic(0x20, 0x28);
 
     // Dont think i need to do this.
     memset((void*)_vectors, 0x00, sizeof(int));
 
     // Mask off all IRQs
-    irq_disable(0);
-    irq_disable(1);
-    irq_disable(2);
-    irq_disable(3);
-    irq_disable(4);
-    irq_disable(5);
-    irq_disable(6);
-    irq_disable(7);
-    irq_disable(8);
-    irq_disable(9);
-    irq_disable(10);
-    irq_disable(11);
-    irq_disable(12);
-    irq_disable(13);
-    irq_disable(14);
-    irq_disable(15);
+    disable_interrupt(0);
+    disable_interrupt(1);
+    disable_interrupt(2);
+    disable_interrupt(3);
+    disable_interrupt(4);
+    disable_interrupt(5);
+    disable_interrupt(6);
+    disable_interrupt(7);
+    disable_interrupt(8);
+    disable_interrupt(9);
+    disable_interrupt(10);
+    disable_interrupt(11);
+    disable_interrupt(12);
+    disable_interrupt(13);
+    disable_interrupt(14);
+    disable_interrupt(15);
 
     // Install all idt gates
     idt_setGate(0x20, &irq_stub0, IDT_FLG_PRESENT | IDT_FLG_DPL0 | IDT_FLG_INTEGATE);
@@ -113,16 +113,7 @@ void initIRQ() {
     idt_setGate(0x2f, &irq_stub15, IDT_FLG_PRESENT | IDT_FLG_DPL0 | IDT_FLG_INTEGATE);
 }
 
-void irq_installHandler(int irq, void(*fn)(regs_t*)) {
-
-    // Install the fn route in the vector that irqEntryN will call
-    _vectors[irq] = fn;
-
-    // Enable the IRQ in on the PIC
-    irq_enable(irq);
-}
-
-void irq_disable(uint32_t n) {
+void disable_interrupt(uint32_t n) {
     uint16_t port;
     uint8_t val;
 
@@ -137,7 +128,7 @@ void irq_disable(uint32_t n) {
     outb(val, port);
 }
 
-void irq_enable(uint32_t n) {
+void enable_interrupt(uint32_t n) {
     uint16_t port;
     uint8_t val;
 
@@ -152,19 +143,7 @@ void irq_enable(uint32_t n) {
     outb(val, port);
 }
 
-void irq_dispatch(regs_t *r) {
-    if(_vectors[r->int_no] != NULL)
-        _vectors[r->int_no](r);
-#ifdef PROFILE_DEBUG
-    else 
-        dbg_printf("Unhandled IRQ: %i\n", r->int_no);
-#endif
-
-    if(r->int_no >= 8) outb(PIC_EOI, PIC1);
-    outb(PIC_EOI, PIC0);
-}
-
-void pic_remap(uint32_t offset_pic0, uint32_t offset_pic1) {
+void remap_pic(uint32_t offset_pic0, uint32_t offset_pic1) {
 
     uint8_t mask_pic0, mask_pic1;
 
@@ -186,3 +165,25 @@ void pic_remap(uint32_t offset_pic0, uint32_t offset_pic1) {
 	outb(mask_pic1, PIC1_DATA);
 
 }
+
+void dispatch_irq_handler(regs_t *r) {
+    if(_vectors[r->int_no] != NULL)
+        _vectors[r->int_no](r);
+#ifdef PROFILE_DEBUG
+    else 
+        dbg_printf("Unhandled IRQ: %i\n", r->int_no);
+#endif
+
+    if(r->int_no >= 8) outb(PIC_EOI, PIC1);
+    outb(PIC_EOI, PIC0);
+}
+
+void install_irq_handler(int irq, void(*fn)(regs_t*)) {
+
+    // Install the fn route in the vector that irqEntryN will call
+    _vectors[irq] = fn;
+
+    // Enable the IRQ in on the PIC
+    enable_interrupt(irq);
+}
+

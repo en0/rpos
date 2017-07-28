@@ -18,13 +18,14 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#ifndef __IIRQ_H
-#define __IIRQ_H 1
+#include <irq/idt.h>
+#include <irq/irq.h>
 
-#include <stdint.h>
-#include <cpu/core.h>
+extern void idt_setup(void);
+extern void irq_setup(void);
 
-void install_irq_handler(int, void(*)(regs_t*));
-void dispatch_irq_handler(regs_t *r);
+void initialize_interrupt_core() {
+    idt_setup();
+    irq_setup();
+}
 
-#endif /** __IIRQ_H **/

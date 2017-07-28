@@ -18,12 +18,11 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
+#include <stdbool.h>
 #include <kernel.h>
 #include <string.h>
-#include <kprint.h>
 #include <debug.h>
-#include <mem/pmem.h>
-#include <mem/vmem.h>
+#include <memory.h>
 
 uint32_t* _vmap_dir;
 uint32_t* _vmap_tbl = VIRT_ADDR_PGPTE;

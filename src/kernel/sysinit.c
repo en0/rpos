@@ -21,7 +21,9 @@
 #include <config.h>
 #include <kernel.h>
 #include <boot/multiboot.h>
+#include <irq.h>
 #include <cpu.h>
+
 #include <mem/pmem.h>
 #include <mem/vmem.h>
 #include <mem/heap.h>
@@ -190,8 +192,9 @@ void system_init(multiboot_info_t* mbi) {
     init_video();
 
     initGDT();
-    initIDT();
-    initIRQ();
+
+    initialize_interrupt_core();
+
     initFAULT();
 
     initRTC();

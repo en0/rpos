@@ -21,9 +21,7 @@
 #ifndef __HEAP_H
 #define __HEAP_H 1
 
-#include <config.h>
 #include <stdint.h>
-#include <stddef.h>
 
 typedef struct heap_info {
     void *high_water_mark;

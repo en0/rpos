@@ -16,7 +16,7 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-            .global initIDT
+            .global idt_setup
             .global idt_setGate
 
             .section .bss
@@ -34,7 +34,8 @@ idt_info:   .2byte idt_end - idt_start - 1
             .section .text
             .align 4
 
-initIDT:    lidt idt_info       # Install the new IDT
+idt_setup:
+            lidt idt_info       # Install the new IDT
             ret                 # Head back to start.s
 
 idt_setGate:

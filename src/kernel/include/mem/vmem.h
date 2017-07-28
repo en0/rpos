@@ -18,10 +18,7 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <config.h>
-#include <stddef.h>
 #include <stdint.h>
-#include <stdbool.h>
 
 #ifndef __VMEM_H
 #define __VMEM_H 1

@@ -20,7 +20,8 @@
 
 #include <kprint.h>
 #include <stdarg.h>
-#include "string.h"
+#include <stdbool.h>
+#include <string.h>
 
 #define VIDEO_MEMORY 0xB8000
 #define VIDEO_COLOR 0x04 // Red on black

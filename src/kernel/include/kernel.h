@@ -23,8 +23,6 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include <stdbool.h>
-#include <mem/heap.h>
 
 /* Provided by linker */
 extern void* _kernel;

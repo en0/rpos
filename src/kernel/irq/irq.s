@@ -19,7 +19,8 @@
 ## Some of this code was addapted from 
 ## http://www.osdever.net/tutorials/view/brans-kernel-development-tutorial 
 
-                .extern irq_dispatch
+                .extern dispatch_irq_handler
+                .equ handler, dispatch_irq_handler
 
                 .section .text
                 .align 4
@@ -44,7 +45,7 @@ irq_common:     pusha                   # Push all GP Registes
                 mov %ax, %gs
                 mov %esp, %eax          # Push up the stack pointer
                 push %eax
-                mov $irq_dispatch, %eax
+                mov $handler, %eax
                 call *%eax              # Call irq_dispatch, preserves the 'eip' register
                 pop %eax
                 pop %gs
