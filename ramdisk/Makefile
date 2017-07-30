@@ -29,4 +29,9 @@ all : $(TARGET)
 
 $(TARGET) : $(SOURCE)
 	@echo \ - TAR $@
-	tar cf $@ $<
+	@tar -cf $@ -C $< --transform='s/^.//' .
+
+.PHONY : clean
+
+clean : 
+	$(RM) $(TARGET)
