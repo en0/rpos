@@ -1,0 +1,52 @@
+@node fputws
+@section @code{fputws}, @code{fputws_unlocked}---write a wide character string in a file or stream
+@findex fputws   
+@findex fputws_unlocked 
+@findex _fputws_r
+@findex _fputws_unlocked_r
+@strong{Synopsis}
+@example
+#include <wchar.h>
+int fputws(const wchar_t *__restrict @var{ws}, FILE *__restrict @var{fp});
+
+#define _GNU_SOURCE
+#include <wchar.h>
+int fputws_unlocked(const wchar_t *__restrict @var{ws}, FILE *__restrict @var{fp});
+
+#include <wchar.h>
+int _fputws_r(struct _reent *@var{ptr}, const wchar_t *@var{ws},
+    FILE *@var{fp});
+
+#include <wchar.h>
+int _fputws_unlocked_r(struct _reent *@var{ptr}, const wchar_t *@var{ws},
+    FILE *@var{fp});
+
+@end example
+@strong{Description}@*
+@code{fputws} writes the wide character string at @var{ws} (but without the
+trailing null) to the file or stream identified by @var{fp}.
+
+@code{fputws_unlocked} is a non-thread-safe version of @code{fputws}.
+@code{fputws_unlocked} may only safely be used within a scope
+protected by flockfile() (or ftrylockfile()) and funlockfile().  This
+function may safely be used in a multi-threaded program if and only
+if they are called while the invoking thread owns the (FILE *)
+object, as is the case after a successful call to the flockfile() or
+ftrylockfile() functions.  If threads are disabled, then
+@code{fputws_unlocked} is equivalent to @code{fputws}.
+
+@code{_fputws_r} and @code{_fputws_unlocked_r} are simply reentrant versions of the
+above that take an additional reentrant struct pointer argument: @var{ptr}.
+
+@*
+@strong{Returns}@*
+If successful, the result is a non-negative integer; otherwise, the result
+is @code{-1} to indicate an error.
+
+@*
+@strong{Portability}@*
+@code{fputws} is required by C99 and POSIX.1-2001.
+
+@code{fputws_unlocked} is a GNU extension.
+
+@*

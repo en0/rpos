@@ -1,0 +1,59 @@
+@node fgets
+@section @code{fgets}, @code{fgets_unlocked}---get character string from a file or stream
+@findex fgets
+@findex fgets_unlocked
+@findex _fgets_r
+@findex _fgets_unlocked_r
+@strong{Synopsis}
+@example
+#include <stdio.h>
+char *fgets(char *restrict @var{buf}, int @var{n}, FILE *restrict @var{fp});
+
+#define _GNU_SOURCE
+#include <stdio.h>
+char *fgets_unlocked(char *restrict @var{buf}, int @var{n}, FILE *restrict @var{fp});
+
+#include <stdio.h>
+char *_fgets_r(struct _reent *@var{ptr}, char *restrict @var{buf}, int @var{n}, FILE *restrict @var{fp});
+
+#include <stdio.h>
+char *_fgets_unlocked_r(struct _reent *@var{ptr}, char *restrict @var{buf}, int @var{n}, FILE *restrict @var{fp});
+
+@end example
+@strong{Description}@*
+Reads at most @var{n-1} characters from @var{fp} until a newline
+is found. The characters including to the newline are stored
+in @var{buf}. The buffer is terminated with a 0.
+
+@code{fgets_unlocked} is a non-thread-safe version of @code{fgets}.
+@code{fgets_unlocked} may only safely be used within a scope
+protected by flockfile() (or ftrylockfile()) and funlockfile().  This
+function may safely be used in a multi-threaded program if and only
+if they are called while the invoking thread owns the (FILE *)
+object, as is the case after a successful call to the flockfile() or
+ftrylockfile() functions.  If threads are disabled, then
+@code{fgets_unlocked} is equivalent to @code{fgets}.
+
+The functions @code{_fgets_r} and @code{_fgets_unlocked_r} are simply
+reentrant versions that are passed the additional reentrant structure
+pointer argument: @var{ptr}.
+
+@*
+@strong{Returns}@*
+@code{fgets} returns the buffer passed to it, with the data
+filled in. If end of file occurs with some data already
+accumulated, the data is returned with no other indication. If
+no data are read, NULL is returned instead.
+
+@*
+@strong{Portability}@*
+@code{fgets} should replace all uses of @code{gets}. Note however
+that @code{fgets} returns all of the data, while @code{gets} removes
+the trailing newline (with no indication that it has done so.)
+
+@code{fgets_unlocked} is a GNU extension.
+
+Supporting OS subroutines required: @code{close}, @code{fstat}, @code{isatty},
+@code{lseek}, @code{read}, @code{sbrk}, @code{write}.
+
+@*

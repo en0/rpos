@@ -1,0 +1,62 @@
+@node fread
+@section @code{fread}. @code{fread_unlocked}---read array elements from a file
+@findex fread
+@findex fread_unlocked
+@findex _fread_r
+@findex _fread_unlocked_r
+@strong{Synopsis}
+@example
+#include <stdio.h>
+size_t fread(void *restrict @var{buf}, size_t @var{size}, size_t @var{count},
+    FILE *restrict @var{fp});
+
+#define _BSD_SOURCE
+#include <stdio.h>
+size_t fread_unlocked(void *restrict @var{buf}, size_t @var{size}, size_t @var{count},
+    FILE *restrict @var{fp});
+
+#include <stdio.h>
+size_t _fread_r(struct _reent *@var{ptr}, void *restrict @var{buf},
+    size_t @var{size}, size_t @var{count}, FILE *restrict @var{fp});
+
+#include <stdio.h>
+size_t _fread_unlocked_r(struct _reent *@var{ptr}, void *restrict @var{buf},
+    size_t @var{size}, size_t @var{count}, FILE *restrict @var{fp});
+
+@end example
+@strong{Description}@*
+@code{fread} attempts to copy, from the file or stream identified by
+@var{fp}, @var{count} elements (each of size @var{size}) into memory,
+starting at @var{buf}.   @code{fread} may copy fewer elements than
+@var{count} if an error, or end of file, intervenes.
+
+@code{fread} also advances the file position indicator (if any) for
+@var{fp} by the number of @emph{characters} actually read.
+
+@code{fread_unlocked} is a non-thread-safe version of @code{fread}.
+@code{fread_unlocked} may only safely be used within a scope
+protected by flockfile() (or ftrylockfile()) and funlockfile().  This
+function may safely be used in a multi-threaded program if and only
+if they are called while the invoking thread owns the (FILE *)
+object, as is the case after a successful call to the flockfile() or
+ftrylockfile() functions.  If threads are disabled, then
+@code{fread_unlocked} is equivalent to @code{fread}.
+
+@code{_fread_r} and @code{_fread_unlocked_r} are simply reentrant versions of the
+above that take an additional reentrant structure pointer argument: @var{ptr}.
+
+@*
+@strong{Returns}@*
+The result of @code{fread} is the number of elements it succeeded in
+reading.
+
+@*
+@strong{Portability}@*
+ANSI C requires @code{fread}.
+
+@code{fread_unlocked} is a BSD extension also provided by GNU libc.
+
+Supporting OS subroutines required: @code{close}, @code{fstat}, @code{isatty},
+@code{lseek}, @code{read}, @code{sbrk}, @code{write}.
+
+@*

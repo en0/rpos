@@ -1,0 +1,58 @@
+@node fgetws
+@section @code{fgetws}, @code{fgetws_unlocked}---get wide character string from a file or stream
+@findex fgetws
+@findex fgetws_unlocked
+@findex _fgetws_r
+@findex _fgetws_unlocked_r
+@strong{Synopsis}
+@example
+#include <wchar.h>
+wchar_t *fgetws(wchar_t *__restrict @var{ws}, int @var{n},
+    FILE *__restrict @var{fp});
+
+#define _GNU_SOURCE
+#include <wchar.h>
+wchar_t *fgetws_unlocked(wchar_t *__restrict @var{ws}, int @var{n},
+    FILE *__restrict @var{fp});
+
+#include <wchar.h>
+wchar_t *_fgetws_r(struct _reent *@var{ptr}, wchar_t *@var{ws},
+    int @var{n}, FILE *@var{fp});
+
+#include <wchar.h>
+wchar_t *_fgetws_unlocked_r(struct _reent *@var{ptr}, wchar_t *@var{ws},
+    int @var{n}, FILE *@var{fp});
+
+@end example
+@strong{Description}@*
+Reads at most @var{n-1} wide characters from @var{fp} until a newline
+is found. The wide characters including to the newline are stored
+in @var{ws}. The buffer is terminated with a 0.
+
+@code{fgetws_unlocked} is a non-thread-safe version of @code{fgetws}.
+@code{fgetws_unlocked} may only safely be used within a scope
+protected by flockfile() (or ftrylockfile()) and funlockfile().  This
+function may safely be used in a multi-threaded program if and only
+if they are called while the invoking thread owns the (FILE *)
+object, as is the case after a successful call to the flockfile() or
+ftrylockfile() functions.  If threads are disabled, then
+@code{fgetws_unlocked} is equivalent to @code{fgetws}.
+
+The @code{_fgetws_r} and @code{_fgetws_unlocked_r} functions are simply reentrant
+version of the above and are passed an additional reentrancy structure
+pointer: @var{ptr}.
+
+@*
+@strong{Returns}@*
+@code{fgetws} returns the buffer passed to it, with the data
+filled in. If end of file occurs with some data already
+accumulated, the data is returned with no other indication. If
+no data are read, NULL is returned instead.
+
+@*
+@strong{Portability}@*
+@code{fgetws} is required by C99 and POSIX.1-2001.
+
+@code{fgetws_unlocked} is a GNU extension.
+
+@*

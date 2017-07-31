@@ -1,0 +1,87 @@
+@node fputwc
+@section @code{fputwc}, @code{putwc}, @code{fputwc_unlocked}, @code{putwc_unlocked}---write a wide character on a stream or file
+@findex fputwc
+@findex fputwc_unlocked
+@findex _fputwc_r
+@findex _fputwc_unlocked_r
+@findex putwc
+@findex putwc_unlocked
+@findex _putwc_r
+@findex _putwc_unlocked_r
+@strong{Synopsis}
+@example
+#include <stdio.h>
+#include <wchar.h>
+wint_t fputwc(wchar_t @var{wc}, FILE *@var{fp});
+
+#define _GNU_SOURCE
+#include <stdio.h>
+#include <wchar.h>
+wint_t fputwc_unlocked(wchar_t @var{wc}, FILE *@var{fp});
+
+#include <stdio.h>
+#include <wchar.h>
+wint_t _fputwc_r(struct _reent *@var{ptr}, wchar_t @var{wc}, FILE *@var{fp});
+
+#include <stdio.h>
+#include <wchar.h>
+wint_t _fputwc_unlocked_r(struct _reent *@var{ptr}, wchar_t @var{wc}, FILE *@var{fp});
+
+#include <stdio.h>
+#include <wchar.h>
+wint_t putwc(wchar_t @var{wc}, FILE *@var{fp});
+
+#define _GNU_SOURCE
+#include <stdio.h>
+#include <wchar.h>
+wint_t putwc_unlocked(wchar_t @var{wc}, FILE *@var{fp});
+
+#include <stdio.h>
+#include <wchar.h>
+wint_t _putwc_r(struct _reent *@var{ptr}, wchar_t @var{wc}, FILE *@var{fp});
+
+#include <stdio.h>
+#include <wchar.h>
+wint_t _putwc_unlocked_r(struct _reent *@var{ptr}, wchar_t @var{wc}, FILE *@var{fp});
+
+@end example
+@strong{Description}@*
+@code{fputwc} writes the wide character argument @var{wc} to the file or
+stream identified by @var{fp}.
+
+If the file was opened with append mode (or if the stream cannot
+support positioning), then the new wide character goes at the end of the
+file or stream.  Otherwise, the new wide character is written at the
+current value of the position indicator, and the position indicator
+oadvances by one.
+
+@code{fputwc_unlocked} is a non-thread-safe version of @code{fputwc}.
+@code{fputwc_unlocked} may only safely be used within a scope
+protected by flockfile() (or ftrylockfile()) and funlockfile().  This
+function may safely be used in a multi-threaded program if and only
+if they are called while the invoking thread owns the (FILE *)
+object, as is the case after a successful call to the flockfile() or
+ftrylockfile() functions.  If threads are disabled, then
+@code{fputwc_unlocked} is equivalent to @code{fputwc}.
+
+The @code{putwc} and @code{putwc_unlocked} functions or macros function identically
+to @code{fputwc} and @code{fputwc_unlocked}.  They may be implemented as a macro, and
+may evaluate its argument more than once. There is no reason ever to use them.
+
+The @code{_fputwc_r}, @code{_putwc_r}, @code{_fputwc_unlocked_r}, and
+@code{_putwc_unlocked_r} functions are simply reentrant versions of the above
+that take an additional reentrant structure argument: @var{ptr}.
+
+@*
+@strong{Returns}@*
+If successful, @code{fputwc} and @code{putwc} return their argument @var{wc}.
+If an error intervenes, the result is @code{EOF}.  You can use
+`@code{ferror(@var{fp})}' to query for errors.
+
+@*
+@strong{Portability}@*
+@code{fputwc} and @code{putwc} are required by C99 and POSIX.1-2001.
+
+@code{fputwc_unlocked} and @code{putwc_unlocked} are GNU extensions.
+
+@*

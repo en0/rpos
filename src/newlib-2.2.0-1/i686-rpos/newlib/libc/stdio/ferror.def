@@ -1,0 +1,45 @@
+@node ferror
+@section @code{ferror}, @code{ferror_unlocked}---test whether read/write error has occurred
+@findex ferror
+@findex ferror_unlocked
+@strong{Synopsis}
+@example
+#include <stdio.h>
+int ferror(FILE *@var{fp});
+
+#define _BSD_SOURCE
+#include <stdio.h>
+int ferror_unlocked(FILE *@var{fp});
+
+@end example
+@strong{Description}@*
+The @code{stdio} functions maintain an error indicator with each file
+pointer @var{fp}, to record whether any read or write errors have
+occurred on the associated file or stream.
+Use @code{ferror} to query this indicator.
+
+See @code{clearerr} to reset the error indicator.
+
+@code{ferror_unlocked} is a non-thread-safe version of @code{ferror}.
+@code{ferror_unlocked} may only safely be used within a scope
+protected by flockfile() (or ftrylockfile()) and funlockfile().  This
+function may safely be used in a multi-threaded program if and only
+if they are called while the invoking thread owns the (FILE *)
+object, as is the case after a successful call to the flockfile() or
+ftrylockfile() functions.  If threads are disabled, then
+@code{ferror_unlocked} is equivalent to @code{ferror}.
+
+@*
+@strong{Returns}@*
+@code{ferror} returns @code{0} if no errors have occurred; it returns a
+nonzero value otherwise.
+
+@*
+@strong{Portability}@*
+ANSI C requires @code{ferror}.
+
+@code{ferror_unlocked} is a BSD extension also provided by GNU libc.
+
+No supporting OS subroutines are required.
+
+@*

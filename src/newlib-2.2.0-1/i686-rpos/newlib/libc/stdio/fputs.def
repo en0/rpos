@@ -1,0 +1,53 @@
+@node fputs
+@section @code{fputs}, @code{fputs_unlocked}---write a character string in a file or stream
+@findex fputs
+@findex fputs_unlocked
+@findex _fputs_r
+@findex _fputs_unlocked_r
+@strong{Synopsis}
+@example
+#include <stdio.h>
+int fputs(const char *restrict @var{s}, FILE *restrict @var{fp});
+
+#define _GNU_SOURCE
+#include <stdio.h>
+int fputs_unlocked(const char *restrict @var{s}, FILE *restrict @var{fp});
+
+#include <stdio.h>
+int _fputs_r(struct _reent *@var{ptr}, const char *restrict @var{s}, FILE *restrict @var{fp});
+
+#include <stdio.h>
+int _fputs_unlocked_r(struct _reent *@var{ptr}, const char *restrict @var{s}, FILE *restrict @var{fp});
+
+@end example
+@strong{Description}@*
+@code{fputs} writes the string at @var{s} (but without the trailing null)
+to the file or stream identified by @var{fp}.
+
+@code{fputs_unlocked} is a non-thread-safe version of @code{fputs}.
+@code{fputs_unlocked} may only safely be used within a scope
+protected by flockfile() (or ftrylockfile()) and funlockfile().  This
+function may safely be used in a multi-threaded program if and only
+if they are called while the invoking thread owns the (FILE *)
+object, as is the case after a successful call to the flockfile() or
+ftrylockfile() functions.  If threads are disabled, then
+@code{fputs_unlocked} is equivalent to @code{fputs}.
+
+@code{_fputs_r} and @code{_fputs_unlocked_r} are simply reentrant versions of the
+above that take an additional reentrant struct pointer argument: @var{ptr}.
+
+@*
+@strong{Returns}@*
+If successful, the result is @code{0}; otherwise, the result is @code{EOF}.
+
+@*
+@strong{Portability}@*
+ANSI C requires @code{fputs}, but does not specify that the result on
+success must be @code{0}; any non-negative value is permitted.
+
+@code{fputs_unlocked} is a GNU extension.
+
+Supporting OS subroutines required: @code{close}, @code{fstat}, @code{isatty},
+@code{lseek}, @code{read}, @code{sbrk}, @code{write}.
+
+@*

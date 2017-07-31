@@ -1,0 +1,34 @@
+@node __fsetlocking
+@section @code{__fsetlocking}---set or query locking mode on FILE stream
+@findex __fsetlocking
+@strong{Synopsis}
+@example
+#include <stdio.h>
+#include <stdio_ext.h>
+int __fsetlocking(FILE *@var{fp}, int @var{type});
+
+@end example
+@strong{Description}@*
+This function sets how the stdio functions handle locking of FILE @var{fp}.
+The following values describe @var{type}:
+
+@code{FSETLOCKING_INTERNAL} is the default state, where stdio functions
+automatically lock and unlock the stream.
+
+@code{FSETLOCKING_BYCALLER} means that automatic locking in stdio functions
+is disabled. Applications which set this take all responsibility for file
+locking themselves.
+
+@code{FSETLOCKING_QUERY} returns the current locking mode without changing it.
+
+@*
+@strong{Returns}@*
+@code{__fsetlocking} returns the current locking mode of @var{fp}.
+
+@*
+@strong{Portability}@*
+This function originates from Solaris and is also provided by GNU libc.
+
+No supporting OS subroutines are required.
+
+@*

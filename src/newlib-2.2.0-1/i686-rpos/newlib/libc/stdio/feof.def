@@ -1,0 +1,41 @@
+@node feof
+@section @code{feof}, @code{feof_unlocked}---test for end of file
+@findex feof
+@findex feof_unlocked
+@strong{Synopsis}
+@example
+#include <stdio.h>
+int feof(FILE *@var{fp});
+
+#define _BSD_SOURCE
+#include <stdio.h>
+int feof_unlocked(FILE *@var{fp});
+
+@end example
+@strong{Description}@*
+@code{feof} tests whether or not the end of the file identified by @var{fp}
+has been reached.
+
+@code{feof_unlocked} is a non-thread-safe version of @code{feof}.
+@code{feof_unlocked} may only safely be used within a scope
+protected by flockfile() (or ftrylockfile()) and funlockfile().  This
+function may safely be used in a multi-threaded program if and only
+if they are called while the invoking thread owns the (FILE *)
+object, as is the case after a successful call to the flockfile() or
+ftrylockfile() functions.  If threads are disabled, then
+@code{feof_unlocked} is equivalent to @code{feof}.
+
+@*
+@strong{Returns}@*
+@code{feof} returns @code{0} if the end of file has not yet been reached; if
+at end of file, the result is nonzero.
+
+@*
+@strong{Portability}@*
+@code{feof} is required by ANSI C.
+
+@code{feof_unlocked} is a BSD extension also provided by GNU libc.
+
+No supporting OS subroutines are required.
+
+@*

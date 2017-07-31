@@ -1,0 +1,51 @@
+@node putwchar
+@section @code{putwchar}, @code{putwchar_unlocked}---write a wide character to standard output
+@findex putwchar
+@findex putwchar_unlocked
+@findex _putwchar_r
+@findex _putwchar_unlocked_r
+@strong{Synopsis}
+@example
+#include <wchar.h>
+wint_t putwchar(wchar_t @var{wc});
+
+#include <wchar.h>
+wint_t putwchar_unlocked(wchar_t @var{wc});
+
+#include <wchar.h>
+wint_t _putwchar_r(struct _reent *@var{reent}, wchar_t @var{wc});
+
+#include <wchar.h>
+wint_t _putwchar_unlocked_r(struct _reent *@var{reent}, wchar_t @var{wc});
+
+@end example
+@strong{Description}@*
+The @code{putwchar} function or macro is the wide-character equivalent of
+the @code{putchar} function. It writes the wide character wc to stdout.
+
+@code{putwchar_unlocked} is a non-thread-safe version of @code{putwchar}.
+@code{putwchar_unlocked} may only safely be used within a scope
+protected by flockfile() (or ftrylockfile()) and funlockfile().  This
+function may safely be used in a multi-threaded program if and only
+if they are called while the invoking thread owns the (FILE *)
+object, as is the case after a successful call to the flockfile() or
+ftrylockfile() functions.  If threads are disabled, then
+@code{putwchar_unlocked} is equivalent to @code{putwchar}.
+
+The alternate functions @code{_putwchar_r} and @code{_putwchar_unlocked_r} are
+reentrant versions of the above.  The extra argument @var{reent} is a pointer
+to a reentrancy structure.
+
+@*
+@strong{Returns}@*
+If successful, @code{putwchar} returns its argument @var{wc}.  If an error
+intervenes, the result is @code{EOF}.  You can use `@code{ferror(stdin)}' to
+query for errors.
+
+@*
+@strong{Portability}@*
+@code{putwchar} is required by C99.
+
+@code{putwchar_unlocked} is a GNU extension.
+
+@*

@@ -1,0 +1,85 @@
+@node fgetwc
+@section @code{fgetwc}, @code{getwc}, @code{fgetwc_unlocked}, @code{getwc_unlocked}---get a wide character from a file or stream
+@findex fgetwc
+@findex fgetwc_unlocked
+@findex _fgetwc_r
+@findex _fgetwc_unlocked_r
+@findex getwc
+@findex getwc_unlocked
+@findex _getwc_r
+@findex _getwc_unlocked_r
+@strong{Synopsis}
+@example
+#include <stdio.h>
+#include <wchar.h>
+wint_t fgetwc(FILE *@var{fp});
+
+#define _GNU_SOURCE
+#include <stdio.h>
+#include <wchar.h>
+wint_t fgetwc_unlocked(FILE *@var{fp});
+
+#include <stdio.h>
+#include <wchar.h>
+wint_t _fgetwc_r(struct _reent *@var{ptr}, FILE *@var{fp});
+
+#include <stdio.h>
+#include <wchar.h>
+wint_t _fgetwc_unlocked_r(struct _reent *@var{ptr}, FILE *@var{fp});
+
+#include <stdio.h>
+#include <wchar.h>
+wint_t getwc(FILE *@var{fp});
+
+#define _GNU_SOURCE
+#include <stdio.h>
+#include <wchar.h>
+wint_t getwc_unlocked(FILE *@var{fp});
+
+#include <stdio.h>
+#include <wchar.h>
+wint_t _getwc_r(struct _reent *@var{ptr}, FILE *@var{fp});
+
+#include <stdio.h>
+#include <wchar.h>
+wint_t _getwc_unlocked_r(struct _reent *@var{ptr}, FILE *@var{fp});
+
+@end example
+@strong{Description}@*
+Use @code{fgetwc} to get the next wide character from the file or stream
+identified by @var{fp}.  As a side effect, @code{fgetwc} advances the file's
+current position indicator.
+
+@code{fgetwc_unlocked} is a non-thread-safe version of @code{fgetwc}.
+@code{fgetwc_unlocked} may only safely be used within a scope
+protected by flockfile() (or ftrylockfile()) and funlockfile().  This
+function may safely be used in a multi-threaded program if and only
+if they are called while the invoking thread owns the (FILE *)
+object, as is the case after a successful call to the flockfile() or
+ftrylockfile() functions.  If threads are disabled, then
+@code{fgetwc_unlocked} is equivalent to @code{fgetwc}.
+
+The @code{getwc} and @code{getwc_unlocked} functions or macros functions identically
+to @code{fgetwc} and @code{fgetwc_unlocked}.  It may be implemented as a macro, and
+may evaluate its argument more than once. There is no reason ever to use it.
+
+@code{_fgetwc_r}, @code{_getwc_r}, @code{_fgetwc_unlocked_r}, and @code{_getwc_unlocked_r}
+are simply reentrant versions of the above functions that are passed the
+additional reentrant structure pointer argument: @var{ptr}.
+
+@*
+@strong{Returns}@*
+The next wide character cast to @code{wint_t}), unless there is no more data,
+or the host system reports a read error; in either of these situations,
+@code{fgetwc} and @code{getwc} return @code{WEOF}.
+
+You can distinguish the two situations that cause an @code{EOF} result by
+using the @code{ferror} and @code{feof} functions.
+
+@*
+@strong{Portability}@*
+@code{fgetwc} and @code{getwc} are required by C99 and POSIX.1-2001.
+
+@code{fgetwc_unlocked} and @code{getwc_unlocked} are GNU extensions.
+
+@*

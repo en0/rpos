@@ -1,0 +1,29 @@
+@node itoa
+@section @code{itoa}---integer to string
+@findex itoa
+@strong{Synopsis}
+@example
+#include <stdlib.h>
+char *itoa(int @var{value}, char *@var{str}, int @var{base});
+char *__itoa(int @var{value}, char *@var{str}, int @var{base});
+
+@end example
+@strong{Description}@*
+@code{itoa} converts the integer [<value>] to a null-terminated string
+using the specified base, which must be between 2 and 36, inclusive.
+If @var{base} is 10, @var{value} is treated as signed and the string will be 
+prefixed with '-' if negative. For all other bases, @var{value} is treated as
+unsigned. @var{str} should be an array long enough to contain the converted
+value, which in the worst case is sizeof(int)*8+1 bytes. 
+
+@*
+@strong{Returns}@*
+A pointer to the string, @var{str}, or NULL if @var{base} is invalid.
+
+@*
+@strong{Portability}@*
+@code{itoa} is non-ANSI.
+
+No supporting OS subroutine calls are required.
+
+@*

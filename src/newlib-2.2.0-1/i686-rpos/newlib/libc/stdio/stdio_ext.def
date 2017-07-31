@@ -1,0 +1,50 @@
+@node stdio_ext
+@section @code{stdio_ext},@code{__fbufsize},@code{__fpending},@code{__flbf},@code{__freadable},@code{__fwritable},@code{__freading},@code{__fwriting}---access internals of FILE structure
+@findex __fbufsize
+@findex __fpending
+@findex __flbf
+@findex __freadable
+@findex __fwritable
+@findex __freading
+@findex __fwriting
+@strong{Synopsis}
+@example
+#include <stdio.h>
+#include <stdio_ext.h>
+size_t __fbufsize(FILE *@var{fp});
+size_t __fpending(FILE *@var{fp});
+int __flbf(FILE *@var{fp});
+int __freadable(FILE *@var{fp});
+int __fwritable(FILE *@var{fp});
+int __freading(FILE *@var{fp});
+int __fwriting(FILE *@var{fp});
+
+@end example
+@strong{Description}@*
+These functions provides access to the internals of the FILE structure @var{fp}.
+
+@*
+@strong{Returns}@*
+@code{__fbufsize} returns the number of bytes in the buffer of stream @var{fp}.
+
+@code{__fpending} returns the number of bytes in the output buffer of stream @var{fp}.
+
+@code{__flbf} returns nonzero if stream @var{fp} is line-buffered, and @code{0} if not.
+
+@code{__freadable} returns nonzero if stream @var{fp} may be read, and @code{0} if not.
+
+@code{__fwritable} returns nonzero if stream @var{fp} may be written, and @code{0} if not.
+
+@code{__freading} returns nonzero if stream @var{fp} if the last operation on
+it was a read, or if it read-only, and @code{0} if not.
+
+@code{__fwriting} returns nonzero if stream @var{fp} if the last operation on
+it was a write, or if it write-only, and @code{0} if not.
+
+@*
+@strong{Portability}@*
+These functions originate from Solaris and are also provided by GNU libc.
+
+No supporting OS subroutines are required.
+
+@*

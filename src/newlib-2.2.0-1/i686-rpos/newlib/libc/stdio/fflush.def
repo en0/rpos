@@ -1,0 +1,66 @@
+@node fflush
+@section @code{fflush}, @code{fflush_unlocked}---flush buffered file output
+@findex fflush
+@findex fflush_unlocked
+@findex _fflush_r
+@findex _fflush_unlocked_r
+@strong{Synopsis}
+@example
+#include <stdio.h>
+int fflush(FILE *@var{fp});
+
+#define _BSD_SOURCE
+#include <stdio.h>
+int fflush_unlocked(FILE *@var{fp});
+
+#include <stdio.h>
+int _fflush_r(struct _reent *@var{reent}, FILE *@var{fp});
+
+#define _BSD_SOURCE
+#include <stdio.h>
+int _fflush_unlocked_r(struct _reent *@var{reent}, FILE *@var{fp});
+
+@end example
+@strong{Description}@*
+The @code{stdio} output functions can buffer output before delivering it
+to the host system, in order to minimize the overhead of system calls.
+
+Use @code{fflush} to deliver any such pending output (for the file
+or stream identified by @var{fp}) to the host system.
+
+If @var{fp} is @code{NULL}, @code{fflush} delivers pending output from all
+open files.
+
+Additionally, if @var{fp} is a seekable input stream visiting a file
+descriptor, set the position of the file descriptor to match next
+unread byte, useful for obeying POSIX semantics when ending a process
+without consuming all input from the stream.
+
+@code{fflush_unlocked} is a non-thread-safe version of @code{fflush}.
+@code{fflush_unlocked} may only safely be used within a scope
+protected by flockfile() (or ftrylockfile()) and funlockfile().  This
+function may safely be used in a multi-threaded program if and only
+if they are called while the invoking thread owns the (FILE *)
+object, as is the case after a successful call to the flockfile() or
+ftrylockfile() functions.  If threads are disabled, then
+@code{fflush_unlocked} is equivalent to @code{fflush}.
+
+The alternate functions @code{_fflush_r} and @code{_fflush_unlocked_r} are
+reentrant versions, where the extra argument @var{reent} is a pointer to
+a reentrancy structure, and @var{fp} must not be NULL.
+
+@*
+@strong{Returns}@*
+@code{fflush} returns @code{0} unless it encounters a write error; in that
+situation, it returns @code{EOF}.
+
+@*
+@strong{Portability}@*
+ANSI C requires @code{fflush}.  The behavior on input streams is only
+specified by POSIX, and not all implementations follow POSIX rules.
+
+@code{fflush_unlocked} is a BSD extension also provided by GNU libc.
+
+No supporting OS subroutines are required.
+
+@*
